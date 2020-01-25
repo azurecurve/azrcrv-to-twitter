@@ -4,7 +4,7 @@ Tags: tweets,twitter
 Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
 Donate link: https://development.azurecurve.co.uk/support-development/
 Requires at least: 1.0.0
-Tested up to: 1.0.0
+Tested up to: 1.1.2
 Requires PHP: 5.6
 Stable tag: trunk
 License: GPLv2 or later
