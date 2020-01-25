@@ -1,0 +1,6 @@
+#toplevel_page_azrcrv_tt_admin_menu:hover .wp-menu-image, #toplevel_page_azrcrv_tt_admin_menu .current .wp-menu-image, #toplevel_page_azrcrv_tt_admin_menu .wp-has-current-submenu .wp-menu-image {
+	background-position:6px 6px !important;
+}
+.azrcrv_tt_tabs {padding:15px !important;}
+.azrcrv_tt_tabs.invisible {display:none;}
+.azrcrv_tt_horiz {margin:0 0 0 10px;}
