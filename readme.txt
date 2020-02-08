@@ -59,14 +59,14 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
-### [Version 1.1.1](https://github.com/azurecurve/azrcrv-to-twitter/tree/v1.1.1)
+### [Version 1.1.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.1.1)
  * Fix bug with incorrect language load text domain.
 
-### [Version 1.1.0](https://github.com/azurecurve/azrcrv-to-twitter/tree/v1.1.0)
+### [Version 1.1.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.1.0)
  * Add integration with Update Manager for automatic updates.
  * Add load_plugin_textdomain to handle translations.
 
-### [Version 1.0.0](https://github.com/azurecurve/azrcrv-to-twitter/tree/v1.0.0)
+### [Version 1.0.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.0.0)
  * Initial release.
 
 == Other Notes ==
