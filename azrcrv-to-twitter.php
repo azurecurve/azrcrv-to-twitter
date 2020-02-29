@@ -134,7 +134,7 @@ function azrcrv_tt_add_plugin_action_link($links, $file){
 	}
 
 	if ($file == $this_plugin){
-		$settings_link = '<a href="'.get_bloginfo('wpurl').'/wp-admin/admin.php?page=azrcrv-tt">'.esc_html__('Settings' ,'to-twitter').'</a>';
+		$settings_link = '<a href="'.get_bloginfo('wpurl').'/wp-admin/admin.php?page=azrcrv-tt"><img src="'.plugins_url('/pluginmenu/images/Favicon-16x16.png', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'to-twitter').'</a>';
 		array_unshift($links, $settings_link);
 	}
 
@@ -200,9 +200,14 @@ function azrcrv_tt_generate_sidebar_metabox(){
 	
 	global $post;
 	
-	$azrcrv_tt_autopost = get_post_meta( $post->ID, '_azrcrv_tt_autopost', true );
-	$azrcrv_tt_tweeted = get_post_meta( $post->ID, '_azrcrv_tt_tweeted', true );
-	$azrcrv_tt_hashtags = get_post_meta( $post->ID, '_azrcrv_tt_hashtags', true );
+	$options = get_option('azrcrv-tt');
+	
+	if(metadata_exists('post', $post->ID, '_azrcrv_tt_autopost')) {
+		$azrcrv_tt_autopost = get_post_meta($post->ID, '_azrcrv_tt_autopost', true);
+	}else{
+		$azrcrv_tt_autopost = $options['default_autopost'];
+	}
+	$azrcrv_tt_tweeted = get_post_meta($post->ID, '_azrcrv_tt_tweeted', true);
 	?>
 	<p class="azrcrv_tt_autopost">
 		<?php wp_nonce_field(basename(__FILE__), 'azrcrv-tt-nonce');
@@ -211,11 +216,70 @@ function azrcrv_tt_generate_sidebar_metabox(){
 		<p><input type="checkbox" name="azrcrv_tt_autopost" <?php if( $azrcrv_tt_autopost == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post tweet on publish/update?', 'to-twitter'); ?></p>
 		<p>
 			<label for="azrcrv_tt_hashtags">Hashtags</label><br/>
+			<?php
+				$azrcrv_tt_hashtags = get_post_meta($post->ID, '_azrcrv_tt_hashtags', true);
+				if (strlen($azrcrv_tt_hashtags) == 0){
+					$azrcrv_tt_hashtags = azrcrv_tt_get_hashtags($post->ID);
+				}
+			?>
 			<input name="azrcrv_tt_hashtags" type="text" style="width: 100%;" value="<?php echo $azrcrv_tt_hashtags; ?>" />
 		</p>
 	</p>
 	
 <?
+}
+
+/**
+ * Load default hashtags.
+ *
+ * @since 1.2.0
+ *
+ */
+function azrcrv_tt_get_hashtags($post_id){
+	
+	$azrcrv_tt_hashtags = get_post_meta( $post_id, '_azrcrv_tt_hashtags', true );
+	
+	if (strlen($azrcrv_tt_hashtags) == 0){
+	
+		$options = get_option('azrcrv-tt');
+		
+		$hashtags = array();
+		
+		$categories = wp_get_post_categories($post_id);
+		foreach($categories as $category){
+			$cat = get_category($category);
+			$items = explode(' ', $options['category-hashtags'][$cat->term_id]);
+			foreach($items as $item){
+				if (strlen($item) > 0 ){
+					$hashtags[] = $item;
+				}
+			}
+		}
+		
+		$tags = wp_get_post_tags($post_id);
+		foreach($tags as $tag){
+			$t = get_tag($tag);
+			$items = explode(' ', $options['tag-hashtags'][$t->term_id]);
+			foreach($items as $item){
+				if (strlen($item) > 0 ){
+					$hashtags[] = $item;
+				}
+			}
+		}
+		
+		sort($hashtags);
+		
+		$lasthashtag = '';
+		$newhashtags = array();
+		
+		foreach($hashtags as $hashtag){
+			if ($hashtag != $lasthashtag){
+				$newhashtags[] = $hashtag;
+			}
+			$lasthashtag = $hashtag;
+		}
+		return implode(' ', $newhashtags);
+	}
 }
 
 /**
@@ -297,8 +361,20 @@ function azrcrv_tt_render_post_tweet_metabox() {
 								class="large-text"
 								value="<?php echo esc_attr( $azrcrv_tt_post_tweet ); ?>"
 							><br />
-							<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%s</strong>'); ?><br/>
-							<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
+							<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%s</strong>'); ?><br />
+							<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?><br />
+							<?php printf(__('Twitter does not allow duplicate tweets so to retweet you need to make a change.', 'to-twitter'), '%s'); ?>
+							
+							<p>
+							<?php
+							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
+								echo '<strong>'.__('Previous Tweets', 'to-twitter').'</strong><br />';
+								foreach(array_reverse(get_post_meta($post->ID, '_azrcrv_tt_tweet_history', true )) as $key => $tweet){
+									echo '•&nbsp;'.$key.' - <em>'.$tweet.'</em><br />';
+								}	
+							}
+							?>
+							</p>
 						<td>
 					</tr>
 				</table>
@@ -337,11 +413,31 @@ function azrcrv_tt_save_post_tweet_metabox( $post_id, $post ) {
 	}
 	
 	if (strlen($_POST['azrcrv_tt_post_tweet']) == 0){
-		$additional_hashtags = get_post_meta( $post_id, '_azrcrv_tt_hashtags', true );
+		$additional_hashtags_string = get_post_meta($post->ID, '_azrcrv_tt_hashtags', true);
 		
+		if (strlen($additional_hashtags_string) == 0){
+			$additional_hashtags = explode(' ', azrcrv_tt_get_hashtags($post->ID));
+		}else{
+			$additional_hashtags = explode(' ', $additional_hashtags_string);
+		}
+		
+		$tweet = $post->post_title;
+		
+		$options = get_option('azrcrv-tt');
+		
+		foreach($options['word-replacement'] as $word => $replacement){
+			if (stristr($tweet, $word)){
+				if (substr($replacement, 0, 1) == '#'){
+					$additional_hashtags = array_diff($additional_hashtags, array($replacement));
+				}
+				$tweet = str_ireplace($word, $replacement, $tweet);
+			}
+		}
+		$additional_hashtags_string = implode(' ', $additional_hashtags);
+				
 		$url = '%s';
 		
-		$azrcrv_tt_post_tweet = $post->post_title.' ' .$url.' ' .$additional_hashtags; //text for your tweet.
+		$azrcrv_tt_post_tweet = $tweet.' '.$url.' '.$additional_hashtags_string; //text for your tweet.
 	}else{
 		/**
 		 * Sanitize the submitted data
@@ -380,7 +476,7 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 		
 		if ($azrcrv_tt_autopost == 1){
 			
-			$azrcrv_tt_post_tweet = get_post_meta( $post->ID, '_azrcrv_tt_post_tweet', true ); // get tweet content
+			$azrcrv_tt_post_tweet = get_post_meta( $post_id, '_azrcrv_tt_post_tweet', true ); // get tweet content
 			
 			if (strlen($azrcrv_tt_post_tweet) > 0){
 			
@@ -396,7 +492,22 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 				if ($tweet_post_status == 200) {
 					update_post_meta($post_id, '_azrcrv_tt_autopost', ''); // remove autpost tweet fag
 					update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
-					update_post_meta( $post->ID, '_azrcrv_tt_post_tweet', $azrcrv_tt_post_tweet );
+					update_post_meta( $post_id, '_azrcrv_tt_post_tweet', $azrcrv_tt_post_tweet );
+					
+					$options = get_option('azrcrv-tt');
+					
+					if ($options['record_tweet_history'] == 1){
+						$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));	
+						if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
+
+							$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+							$tweet_history[$dateTime] = $azrcrv_tt_post_tweet;
+							update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+
+						} else {
+							update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $azrcrv_tt_post_tweet));   
+						}
+					}
 				}
 			}
 		}
@@ -411,12 +522,12 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
  */
 function azrcrv_tt_post_tweet($tweet){
 				
-	$azrcrv_tt = get_option('azrcrv-tt');
+	$options = get_option('azrcrv-tt');
 	
-	define('CONSUMER_KEY', $azrcrv_tt['access_key']);
-	define('CONSUMER_SECRET', $azrcrv_tt['access_secret']);
-	define('ACCESS_TOKEN', $azrcrv_tt['access_token']);
-	define('ACCESS_TOKEN_SECRET', $azrcrv_tt['access_token_secret']);
+	define('CONSUMER_KEY', $options['access_key']);
+	define('CONSUMER_SECRET', $options['access_secret']);
+	define('ACCESS_TOKEN', $options['access_token']);
+	define('ACCESS_TOKEN_SECRET', $options['access_token_secret']);
 	
 	$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET);
 	
@@ -440,13 +551,12 @@ function azrcrv_tt_display_options(){
 		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
 	}
 	
-	$azrcrv_tt = get_option('azrcrv-tt');
+	$options = get_option('azrcrv-tt');
 
     require_once('includes/admin_page.php');
 }
 
 function azrcrv_tt_save_options(){
-	//global $azrcrv_tt_queries, $azrcrv_tt_time, $azrcrv_tt_publish, $azrcrv_tt_tags, $azrcrv_tt_cats, $azrcrv_tt, $connection, $tokens_error;
 
 	// Check that user has proper security level
 	if (!current_user_can('manage_options')){
@@ -460,35 +570,78 @@ function azrcrv_tt_save_options(){
 			return;
 		}
 		
-		$azrcrv_tt = get_option('azrcrv-tt');
+		$options = get_option('azrcrv-tt');
 		
-		if (!empty($azrcrv_tt['access_key']) && !empty($azrcrv_tt['access_secret']) && !empty($azrcrv_tt['access_token']) && !empty($azrcrv_tt['access_token_secret'])) {
-			$connection = new TwitterOAuth($azrcrv_tt['access_key'], $azrcrv_tt['access_secret'], $azrcrv_tt['access_token'], $azrcrv_tt['access_token_secret']);
+		if (!empty($options['access_key']) && !empty($options['access_secret']) && !empty($options['access_token']) && !empty($options['access_token_secret'])) {
+			$connection = new TwitterOAuth($options['access_key'], $options['access_secret'], $options['access_token'], $options['access_token_secret']);
 		}else{
 			$tokens_error = true;
-		}
-		
-		if (isset($_REQUEST['feedback'])) {
-			$azrcrv_tt['feedback'] = true;
-			
-			update_option('azrcrv-tt', $azrcrv_tt);
-			$azrcrv_tt = get_option('azrcrv-tt');
-		}
-		
-		if (isset($_POST['azrcrv_tt_data_update'])) {
-			$azrcrv_tt_temp_array = array();
-		}
+		}		
+
 		
 		/*
 		* UPDATE FORMATTING OPTIONS
 		*/
-		$now_tt = $azrcrv_tt;
-		$now_tt['access_key'] = sanitize_text_field($_POST['azrcrv_tt_access_key']);
-		$now_tt['access_secret'] = sanitize_text_field($_POST['azrcrv_tt_access_secret']);
-		$now_tt['access_token'] = sanitize_text_field($_POST['azrcrv_tt_access_token']);
-		$now_tt['access_token_secret'] = sanitize_text_field($_POST['azrcrv_tt_access_token_secret']);
+		$options['access_key'] = sanitize_text_field($_POST['access_key']);
+		$options['access_secret'] = sanitize_text_field($_POST['access_secret']);
+		$options['access_token'] = sanitize_text_field($_POST['access_token']);
+		$options['access_token_secret'] = sanitize_text_field($_POST['access_token_secret']);
+		$option_name = 'default_autopost';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		$option_name = 'record_tweet_history';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
 		
-		update_option('azrcrv-tt', $now_tt);
+		/*
+		* Update category hashtags
+		*/
+		$option_name = 'category-hashtags';
+		$newoptions = array();
+		if (isset($_POST[$option_name])){
+			foreach ($_POST[$option_name] as $key => $val ) {
+				if (strlen($val) > 0){
+					$newoptions[$key] = sanitize_text_field($val);
+				}
+			}
+		}
+		$options[$option_name] = $newoptions;
+		
+		/*
+		* Update tag hashtags
+		*/
+		$option_name = 'tag-hashtags';
+		$newoptions = array();
+		if (isset($_POST[$option_name])){
+			foreach ($_POST[$option_name] as $key => $val ) {
+				if (strlen($val) > 0){
+					$newoptions[$key] = sanitize_text_field($val);
+				}
+			}
+		}
+		$options[$option_name] = $newoptions;
+		
+		/*
+		* Update word replace
+		*/
+		$option_name = 'word-replacement';
+		$newoptions = array();
+		if (isset($_POST[$option_name])){
+			foreach ($_POST[$option_name] as $array ) {
+				if (strlen($array['key']) > 0){
+					$newoptions[$array['key']] = sanitize_text_field($array['value']);
+				}
+			}
+		}
+		$options[$option_name] = $newoptions;
+		
+		update_option('azrcrv-tt', $options);
 		
 		// Redirect the page to the configuration form that was processed
 		wp_redirect( add_query_arg( 'page', 'azrcrv-tt&settings-updated', admin_url( 'admin.php' ) ) );
@@ -497,13 +650,12 @@ function azrcrv_tt_save_options(){
 }
 
 /*
- * Display send tweet page
+ * Display manual send tweet page
  *
  * @since 1.0.0
  *
  */
 function azrcrv_tt_display_send_tweet(){
-    //global $azrcrv_tt_queries, $azrcrv_tt_time, $azrcrv_tt_publish, $azrcrv_tt, $azrcrv_tt_tags, $azrcrv_tt_cats, $tokens_error, $wp_post_types;
 
 	if (!current_user_can('manage_options')) {
 		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
@@ -514,17 +666,24 @@ function azrcrv_tt_display_send_tweet(){
     require_once('includes/send_tweet_page.php');
 }
 
+
+/*
+ * Send tweet
+ *
+ * @since 1.0.0
+ *
+ */
 function azrcrv_tt_send_tweet(){
 	
 	// Check that user has proper security level
 	if (!current_user_can('manage_options')){
-		wp_die(esc_html__('You do not have permissions to perform this action', 'to-twitter'));
+		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
 	}
 	// Check that nonce field created in configuration form is present
 	if (! empty($_POST) && check_admin_referer('azrcrv-tt-st', 'azrcrv-tt-st-nonce')){
 	
 		if (!function_exists('curl_init')) {
-			error_log('The From Twitter plugin requires CURL libraries');
+			error_log(__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
 			return;
 		}
 		

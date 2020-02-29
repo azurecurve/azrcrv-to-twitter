@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the tweeting of posts upon publication.
-Version:		1.1.1
+Version:		1.2.0
 Tags:			tweets,twitter,automatic
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.1.0/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.2.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -30,9 +30,13 @@ Set hashtags in the hashtags box; these appear after the tweet.
 
 Save a draft of the post to see auto-generated default tweet and amend if necessary; to regenerate default tweet, clear Tweet field and save draft; post URL is represented by a *%s* placeholder.
 
-Integrates with [azurecurve's URL Shortener](https://development.azurecurve.co.uk/classicpress-plugins/url-shortener/) for URL in tweet.
+In the settings you can configure default hashtags for categories and tags to be assigned to tweets (dupicates are removed); word replacements can be configured, allowing you to, for example, switch the word `Microsoft` for `@microsoft`.
 
-This plugin is multisite compatible with each site having it's own settings.
+Tweet history can be enabled so you can see when a post was tweeted and what the tweet contained.
+
+Integrates with azurecurve's [URL Shortener](https://development.azurecurve.co.uk/classicpress-plugins/url-shortener/) for URL in tweet.
+
+This plugin is multisite compatible with each site having its own settings.
 
 == Installation ==
 
@@ -58,6 +62,14 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.2.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.2.0)
+ * Add option to check autopost on new post.
+ * Add tweet history for posts.
+ * Add default category hashtags.
+ * Add default tag hashtags.
+ * Add word replacement where words in tweet can be replaced with @ or hashtags.
+ * Record and display history of tweets; includes setting to enable/disable.
 
 ### [Version 1.1.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.1.1)
  * Fix bug with incorrect language load text domain.
