@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.1.1
+ * Version: 1.2.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
