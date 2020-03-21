@@ -18,7 +18,7 @@
     <form method="post" action="admin-post.php">
 		
 		<input type="hidden" name="action" value="azrcrv_tt_send_tweet" />
-		<?php wp_nonce_field('azrcrv-tt-st', 'azrcrv-tt-st-nonce'); ?>
+		<?php wp_nonce_field('azrcrv-tt-smt', 'azrcrv-tt-smt-nonce'); ?>
 
         <div>
 			<p class="azrcrv_tt_horiz">

@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.2.1
+ * Version: 1.3.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -39,8 +39,14 @@ use Abraham\TwitterOAuth\TwitterOAuth;
  * @since 1.0.0
  *
  */
-// add actions
-//register_activation_hook(__FILE__, 'azrcrv_tt_set_default_options');
+// registere activation hooks
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_monday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_tuesday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_wednesday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_thursday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_friday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_saturday' );
+register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_sunday' );
 
 // add actions
 add_action('admin_menu', 'azrcrv_tt_create_admin_menu');
@@ -53,6 +59,13 @@ add_action( 'transition_post_status', 'azrcrv_tt_post_status_transition', 13, 3 
 add_action('admin_post_azrcrv_tt_save_options', 'azrcrv_tt_save_options');
 add_action('admin_post_azrcrv_tt_send_tweet', 'azrcrv_tt_send_tweet');
 add_action('plugins_loaded', 'azrcrv_tt_load_languages');
+add_action( 'azrcrv_tt_scheduled_post_tweet_monday', 'azrcrv_tt_scheduled_post_send_tweet_monday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_tuesday', 'azrcrv_tt_scheduled_post_send_tweet_tuesday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_wednesday', 'azrcrv_tt_scheduled_post_send_tweet_wednesday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_thursday', 'azrcrv_tt_scheduled_post_send_tweet_thursday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_friday', 'azrcrv_tt_scheduled_post_send_tweet_friday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_saturday', 'azrcrv_tt_scheduled_post_send_tweet_saturday' );
+add_action( 'azrcrv_tt_scheduled_post_tweet_sunday', 'azrcrv_tt_scheduled_post_send_tweet_sunday' );
 
 // add filters
 add_filter('plugin_action_links', 'azrcrv_tt_add_plugin_action_link', 10, 2);
@@ -167,11 +180,18 @@ function azrcrv_tt_create_admin_menu(){
 				
     add_submenu_page(
 				'azrcrv-tt'
-				,__('Send Tweet', 'to-twitter')
-				,__('Send Tweet', 'to-twitter')
+				,__('Send Manual Tweet', 'to-twitter')
+				,__('Send Manual Tweet', 'to-twitter')
 				,'manage_options'
-				,'azrcrv-tt-st'
-				,'azrcrv_tt_display_send_tweet');
+				,'azrcrv-tt-smt'
+				,'azrcrv_tt_display_send_manual_tweet');
+	
+	add_submenu_page("azrcrv-plugin-menu"
+						,__("To Twitter", "to-twitter")
+						,__("To Twitter", "to-twitter")
+						,'manage_options'
+						,'azrcrv-tt'
+						,'azrcrv_tt_display_options');
 	
 	
     wp_enqueue_script("to-twitter-js", plugins_url('assets/jquery/jquery.js', __FILE__), array('jquery', 'jquery-ui-core', 'jquery-ui-tabs'));
@@ -641,7 +661,99 @@ function azrcrv_tt_save_options(){
 		}
 		$options[$option_name] = $newoptions;
 		
+		/*
+		* Scheduled posts
+		*/
+		$option_name = 'scheduled-post';
+		$newoptions = array();
+		if (isset($_POST[$option_name])){
+			for ($dayloop = 0; $dayloop < 7; $dayloop++){
+				$newoptions[$dayloop]['time'] = sanitize_text_field($_POST[$option_name][$dayloop]['time']);
+				$newoptions[$dayloop]['filter'] = sanitize_text_field($_POST[$option_name][$dayloop]['filter']);
+				$newoptions[$dayloop]['category'] = sanitize_text_field($_POST[$option_name][$dayloop]['category']);
+				if (isset($_POST[$option_name][$dayloop]['enabled'])){
+					$newoptions[$dayloop]['enabled'] = 1;
+				}else{
+					$newoptions[$dayloop]['enabled'] = 0;
+				}
+			}
+		}
+		$options[$option_name] = $newoptions;
+		
+		/*
+		* Prefix for scheduled tweets
+		*/
+		$option_name = 'scheduled-tweet-prefix';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		
+		/*
+		* Include suffix
+		*/
+		$option_name = 'scheduled-tweet-suffix';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		
+		/*
+		* Prefix for scheduled tweets
+		*/
+		$option_name = 'scheduled-tweet-generate';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		
+		/*
+		* Scheduled tweet must be at leat this old
+		*/
+		$option_name = 'newest-post-age';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		
+		/*
+		* Update excluded tags
+		*/
+		$option_name = 'excluded-tags';
+		$newoptions = array();
+		if (isset($_POST[$option_name])){
+			foreach ($_POST[$option_name] as $key => $val ) {
+				if (isset($_POST[$option_name][$key])){
+					$newoptions[$key] = 1;
+				}else{
+					$newoptions[$key] = 0;
+				}
+			}
+		}
+		$options[$option_name] = $newoptions;
+		
+		/*
+		* Update options
+		*/
 		update_option('azrcrv-tt', $options);
+		
+		/*
+		* Remove scheduled events
+		*/
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_monday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_tuesday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_wednesday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_thursday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_friday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_saturday");
+		wp_clear_scheduled_hook("azrcrv_tt_scheduled_post_tweet_sunday");
+		
+		/*
+		* Add scheduled event
+		*/
+		azrcrv_tt_schedule_post_tweet_monday();
+		azrcrv_tt_schedule_post_tweet_tuesday();
+		azrcrv_tt_schedule_post_tweet_wednesday();
+		azrcrv_tt_schedule_post_tweet_thursday();
+		azrcrv_tt_schedule_post_tweet_friday();
+		azrcrv_tt_schedule_post_tweet_saturday();
+		azrcrv_tt_schedule_post_tweet_sunday();
 		
 		// Redirect the page to the configuration form that was processed
 		wp_redirect( add_query_arg( 'page', 'azrcrv-tt&settings-updated', admin_url( 'admin.php' ) ) );
@@ -655,7 +767,7 @@ function azrcrv_tt_save_options(){
  * @since 1.0.0
  *
  */
-function azrcrv_tt_display_send_tweet(){
+function azrcrv_tt_display_send_manual_tweet(){
 
 	if (!current_user_can('manage_options')) {
 		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
@@ -663,7 +775,7 @@ function azrcrv_tt_display_send_tweet(){
 	
 	$azrcrv_tt = get_option('azrcrv-tt');
 
-    require_once('includes/send_tweet_page.php');
+    require_once('includes/send_manual_tweet_page.php');
 }
 
 
@@ -680,7 +792,7 @@ function azrcrv_tt_send_tweet(){
 		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
 	}
 	// Check that nonce field created in configuration form is present
-	if (! empty($_POST) && check_admin_referer('azrcrv-tt-st', 'azrcrv-tt-st-nonce')){
+	if (! empty($_POST) && check_admin_referer('azrcrv-tt-smt', 'azrcrv-tt-smt-nonce')){
 	
 		if (!function_exists('curl_init')) {
 			error_log(__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
@@ -707,7 +819,468 @@ function azrcrv_tt_send_tweet(){
 		}
 		
 		// Redirect the page to the configuration form that was processed
-		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-st&'.$tweet_post_status, admin_url('admin.php')));
+		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-smt&'.$tweet_post_status, admin_url('admin.php')));
 		exit;
 	}
+}
+
+/**
+ * Schedule Sunday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_sunday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][0]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][0]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_sunday');
+	}
+}
+
+/**
+ * Send scheduled Sunday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_sunday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Sun' and $options['scheduled_tweet_sent']['Sun'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Sun'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+
+/**
+ * Schedule Monday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_monday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][1]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][1]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_monday');
+	}
+	
+}
+
+/**
+ * Send scheduled Monday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_monday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Mon' and $options['scheduled_tweet_sent']['Mon'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Mon'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Schedule Tuesday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_tuesday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][2]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][2]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_tuesday');
+	}
+}
+
+/**
+ * Send scheduled Tuesday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_tuesday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Tue' and $options['scheduled_tweet_sent']['Tue'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Tue'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Schedule Wednesday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_wednesday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][3]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][3]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_wednesday');
+	}
+}
+
+/**
+ * Send scheduled Wednesday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_wednesday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Wed' and $options['scheduled_tweet_sent']['Wed'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Wed'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Schedule Thursday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_thursday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][4]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][4]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_thursday');
+	}
+}
+
+/**
+ * Send scheduled Thursday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_thursday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Thu' and $options['scheduled_tweet_sent']['Thu'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Thu'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Schedule Friday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_friday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][5]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][5]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_friday');
+	}
+}
+
+/**
+ * Send scheduled Friday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_friday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Fri' and $options['scheduled_tweet_sent']['Fri'] != date('Y-m-d')){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Fri'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Schedule Saturday cron event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_post_tweet_saturday(){
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][6]['enabled'] == 1){
+		wp_schedule_event(strtotime($options['scheduled-post'][6]['time'].':00'), 'daily', 'azrcrv_tt_scheduled_post_tweet_saturday');
+	}
+}
+
+/**
+ * Send scheduled Saturday event.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet_saturday(){
+	
+	$option_name = 'azrcrv-tt';
+	
+	$options = get_option($option_name);
+	
+	if (date('D') == 'Sat' and ($options['scheduled_tweet_sent']['Sat'] != date('Y-m-d') or !isset($options['scheduled_tweet_sent']['Sat']))){
+		azrcrv_tt_scheduled_post_send_tweet();
+		$options['scheduled_tweet_sent']['Sat'] = date('Y-m-d');
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+	}
+}
+
+/**
+ * Send scheduled tweet.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_scheduled_post_send_tweet(){
+	
+	global $wpdb;
+	
+	$sql = azrcrv_tt_select_scheduled_random_tweet(date('w'));
+	
+	$post_id = $wpdb->get_var($sql);
+	$post = get_post($post_id);
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-tweet-generate'] == 1 or !metadata_exists('post',$post_id,'_azrcrv_tt_post_tweet')){
+		
+		$tweet = $post->post_title;
+		
+		if(metadata_exists('post',$post_id,'_azrcrv_tt_hashtags')){
+			$additional_hashtags_string = get_post_meta($post_id, '_azrcrv_tt_hashtags', true);
+		}else{
+			$additional_hashtags_string = '';
+		}
+		
+		if (strlen($additional_hashtags_string) == 0){
+			$additional_hashtags = explode(' ', azrcrv_tt_get_hashtags($post_id));
+		}else{
+			$additional_hashtags = explode(' ', $additional_hashtags_string);
+		}
+		
+		foreach($options['word-replacement'] as $word => $replacement){
+			if (stristr($tweet, $word)){
+				if (substr($replacement, 0, 1) == '#'){
+					$additional_hashtags = array_diff($additional_hashtags, array($replacement));
+				}
+				$tweet = str_ireplace($word, $replacement, $tweet);
+			}
+		}
+		if (count($additional_hashtags) > 0){
+			$additional_hashtags_string = ' '.implode(' ', $additional_hashtags);
+		}else{
+			echo '6#';
+			$additional_hashtags_string = '';
+		}
+		
+		if (function_exists('azrcrv_urls_get_custom_shortlink')){
+			$url = azrcrv_urls_get_custom_shortlink($post_id);
+		}else{
+			$url = get_permalink($post_id);
+		}
+		$tweet = $tweet.' '.$url.$additional_hashtags_string;
+	}else{
+		$tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
+	}
+	
+	if(metadata_exists('post',$post_id,'_azrcrv_tt_scheduled_post_times_tweeted')){
+		$times_retweeted = get_post_meta($post_id, '_azrcrv_tt_scheduled_post_times_tweeted', true);
+		$times_retweeted++;
+	}else{
+		$times_retweeted = 1;
+	}
+	update_post_meta($post_id, '_azrcrv_tt_scheduled_post_times_tweeted', $times_retweeted); 
+	
+	$prefix = $options['scheduled-tweet-prefix'];
+	if (strlen($prefix) > 0){
+		$prefix .= ' ';
+	}
+	
+	if ($options['scheduled-tweet-suffix'] == 0){
+		$suffix = '';
+	}else{
+		$suffix = ' ['.$times_retweeted.']';
+	}
+	
+	$tweet = $prefix.$tweet.$suffix; //text for your tweet.
+	
+	$tweet_post_status = azrcrv_tt_post_tweet($tweet);
+	
+	if ($tweet_post_status == 200){
+		update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
+		
+		if ($options['record_tweet_history'] == 1){
+			$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
+			if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
+
+				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+				$tweet_history[$dateTime] = $tweet;
+				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+
+			} else {
+				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $tweet));   
+			}
+		}
+	//update_post_meta(619, '_crontest', date("Y-m-d h:i:sa").'  '.$tweet_post_status);
+	}
+}
+
+/**
+ * Prepare scheduled random tweet SQL statement.
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_select_scheduled_random_tweet($day){
+	
+	global $wpdb;
+	
+	$options = get_option('azrcrv-tt');
+	
+	if ($options['scheduled-post'][$day]['filter'] == 'Is'){
+		$filter = '=';
+	}else{
+		$filter = '<>';
+	}
+	
+	$category = $options['scheduled-post'][$day]['category'];
+	
+	$tags = array();
+	foreach ($options['excluded-tags'] AS $tag => $exclude){
+		if ($exclude == 1){
+			$tags[] = $tag;
+		}
+	}
+	if (count($tags) == 0){
+		$tag_string = '';
+	}else{
+		$tag_string = 'AND
+				(
+				SELECT
+					COUNT(*)
+				FROM
+					'.$wpdb->prefix.'posts AS ip
+				INNER JOIN
+					'.$wpdb->prefix.'term_relationships AS itr
+						ON
+							itr.object_id = ip.ID
+				INNER JOIN
+					'.$wpdb->prefix.'term_taxonomy AS itt
+						ON
+							itt.term_taxonomy_id = itr.term_taxonomy_id
+						AND
+							itt.taxonomy = \'post_tag\'
+				INNER JOIN
+					'.$wpdb->prefix.'terms AS it
+						ON
+							it.term_id = itt.term_id
+						AND
+							it.term_id IN ('.implode(',', $tags).')
+				WHERE
+					ip.ID = p.ID
+				) = 0';
+	}
+	
+	$before = $options['newest-post-age'];
+	
+	$sql = 'SELECT
+				p.ID
+			FROM
+				'.$wpdb->prefix.'posts AS p
+			INNER JOIN
+				'.$wpdb->prefix.'term_relationships AS tr
+					ON
+						tr.object_id = p.ID
+			INNER JOIN
+				'.$wpdb->prefix.'term_taxonomy AS tt
+					ON
+						tt.term_taxonomy_id = tr.term_taxonomy_id
+					AND
+						tt.taxonomy = \'category\'
+			INNER JOIN
+				'.$wpdb->prefix.'terms AS t
+					ON
+						t.term_id = tt.term_id
+			WHERE
+				p.post_status = \'publish\'
+			AND
+				p.post_type = \'post\'
+			AND
+				t.term_id '.$filter.' \''.$category.'\'
+				'.$tag_string.'
+			AND
+				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY) 
+			ORDER BY
+				RAND()
+			LIMIT
+				0,1';
+	
+	return $sql;
 }

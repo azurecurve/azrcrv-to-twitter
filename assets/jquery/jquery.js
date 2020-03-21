@@ -14,9 +14,5 @@ jQuery(document).ready(function() {
 
 function countChar(val) {
 	var len = val.value.length;
-	if (len >= 240) {
-		val.value = val.value.substring(0, 240);
-	} else {
-		$('#current_counter').text(240 - len);
-	}
+		$('#current_counter').text(len);
 };
