@@ -1,12 +1,12 @@
 === To Twitter ===
 
-Description:	Automate the tweeting of posts upon publication.
-Version:		1.3.0
+Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
+Version:		1.4.0
 Tags:			tweets,twitter,automatic
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.3.0/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.4.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -16,13 +16,13 @@ Domain Path:	/languages
 License: 		GPLv2 or later
 License URI: 	http://www.gnu.org/licenses/gpl-2.0.html
 
-Automate the tweeting of posts upon publication.
+Automate the tweeting of posts upon publication or randomly on a schedule.
 
 == Description ==
 
 # Description
 
-Allows posts to be automatically tweeted when they are published.
+Allows posts to be automatically tweeted when they are published or randomly on a schedule.
 
 Mark the _Post tweet on publish/update?_ checkbox to post tweet when the post is published (works for both immediately and scheduled posts.
 
@@ -35,6 +35,8 @@ In the settings you can configure default hashtags for categories and tags to be
 Tweet history can be enabled so you can see when a post was tweeted and what the tweet contained.
 
 Integrates with azurecurve's [URL Shortener](https://development.azurecurve.co.uk/classicpress-plugins/url-shortener/) for URL in tweet.
+
+Scheduled tweets to automatically post; history of scheduled tweets is available.
 
 This plugin is multisite compatible with each site having its own settings.
 
@@ -62,6 +64,9 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.4.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.4.0)
+ * Add scheduled tweets.
 
 ### [Version 1.3.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.3.0)
  * Add scheduled tweet of random post.

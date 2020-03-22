@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -58,6 +58,8 @@ add_action( 'wp_insert_post', 'azrcrv_tt_autopost_tweet', 12, 2 );
 add_action( 'transition_post_status', 'azrcrv_tt_post_status_transition', 13, 3 );
 add_action('admin_post_azrcrv_tt_save_options', 'azrcrv_tt_save_options');
 add_action('admin_post_azrcrv_tt_send_tweet', 'azrcrv_tt_send_tweet');
+add_action('admin_post_azrcrv_tt_schedule_tweet', 'azrcrv_tt_schedule_tweet');
+add_action('admin_post_azrcrv_tt_delete_scheduled_tweet', 'azrcrv_tt_delete_scheduled_tweet');
 add_action('plugins_loaded', 'azrcrv_tt_load_languages');
 add_action( 'azrcrv_tt_scheduled_post_tweet_monday', 'azrcrv_tt_scheduled_post_send_tweet_monday' );
 add_action( 'azrcrv_tt_scheduled_post_tweet_tuesday', 'azrcrv_tt_scheduled_post_send_tweet_tuesday' );
@@ -180,11 +182,19 @@ function azrcrv_tt_create_admin_menu(){
 				
     add_submenu_page(
 				'azrcrv-tt'
-				,__('Send Manual Tweet', 'to-twitter')
-				,__('Send Manual Tweet', 'to-twitter')
+				,__('Send Tweet', 'to-twitter')
+				,__('Send Tweet', 'to-twitter')
 				,'manage_options'
 				,'azrcrv-tt-smt'
 				,'azrcrv_tt_display_send_manual_tweet');
+				
+    add_submenu_page(
+				'azrcrv-tt'
+				,__('Scheduled Tweets', 'to-twitter')
+				,__('Scheduled Tweets', 'to-twitter')
+				,'manage_options'
+				,'azrcrv-tt-st'
+				,'azrcrv_tt_display_schedule_tweet');
 	
 	add_submenu_page("azrcrv-plugin-menu"
 						,__("To Twitter", "to-twitter")
@@ -823,6 +833,145 @@ function azrcrv_tt_send_tweet(){
 		exit;
 	}
 }
+
+/*
+ * Display schedule tweet page
+ *
+ * @since 1.4.0
+ *
+ */
+function azrcrv_tt_display_schedule_tweet(){
+
+	if (!current_user_can('manage_options')) {
+		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+	}
+	
+	$azrcrv_tt = get_option('azrcrv-tt');
+
+    require_once('includes/schedule_tweet_page.php');
+}
+
+/*
+ * Schedule tweet
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_schedule_tweet(){
+	
+	// Check that user has proper security level
+	if (!current_user_can('manage_options')){
+		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
+	}
+	// Check that nonce field created in configuration form is present
+	if (! empty($_POST) && check_admin_referer('azrcrv-tt-st', 'azrcrv-tt-st-nonce')){
+		
+		$options = get_option('azrcrv-tt');
+	
+		if (!function_exists('curl_init')) {
+			error_log(__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
+			return;
+		}
+		
+		if (!empty($options['access_key']) && !empty($options['access_secret']) && !empty($options['access_token']) && !empty($options['access_token_secret'])) {
+			$connection = new TwitterOAuth($options['access_key'], $options['access_secret'], $options['access_token'], $options['access_token_secret']);
+		}else{
+			$tokens_error = true;
+		}
+		
+		$tweet_post_status = 'tweet-failed';
+ 
+		$option_name = 'scheduled-tweet';
+		if (isset($_POST[$option_name])){
+			$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
+			$schedule_id = date("Y-m-d H:i:s");
+			$scheduled_tweets[$schedule_id]['tweet'] = $_POST['tweet'];
+			$scheduled_tweets[$schedule_id]['date'] = $_POST[$option_name]['date'];
+			$scheduled_tweets[$schedule_id]['time'] = $_POST[$option_name]['time'];
+			wp_schedule_single_event(strtotime(
+											$_POST[$option_name]['date'].' '.
+											date($_POST[$option_name]['time'])
+											), 'azrcrv_tt_scheduled_tweet', array($schedule_id) 
+										);
+		
+			/*
+			* set status
+			*/
+			$tweet_post_status = 'tweet-scheduled';
+			update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
+		}
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt', $options);
+
+		// Redirect the page to the configuration form that was processed
+		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-st&'.$tweet_post_status, admin_url('admin.php')));
+		exit;
+	}
+}
+
+/*
+ * Schedule tweet
+ *
+ * @since 1.3.0
+ *
+ */
+function azrcrv_tt_delete_scheduled_tweet(){
+	
+	// Check that user has proper security level
+	if (!current_user_can('manage_options')){
+		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
+	}
+	// Check that nonce field created in configuration form is present
+	if (! empty($_POST) && check_admin_referer('azrcrv-tt-dst', 'azrcrv-tt-dst-nonce')){
+			
+		$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
+		$option_name = 'tweettodelete';
+		
+		wp_clear_scheduled_hook('azrcrv_tt_scheduled_tweet', array($_POST[$option_name]));
+		
+		unset($scheduled_tweets[$_POST[$option_name]]);
+		/*
+		* set status
+		*/
+		$tweet_post_status = 'tweet-deleted';
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
+
+		// Redirect the page to the configuration form that was processed
+		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-st&'.$tweet_post_status, admin_url('admin.php')));
+		exit;
+	}
+}
+
+function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
+	
+	$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
+	
+	if (isset($scheduled_tweets[$schedule_id]['tweet'])){ // AND $token_error != true) {
+		$scheduled_tweet_history = get_option('azrcrv-tt-scheduled-tweet-history');
+		
+		$status = azrcrv_tt_post_tweet($scheduled_tweets[$schedule_id][tweet]);
+		
+		$scheduled_tweet_history[$schedule_id]['tweet'] = $scheduled_tweets[$schedule_id]['tweet'];
+		$scheduled_tweet_history[$schedule_id]['date'] = $scheduled_tweets[$schedule_id]['date'];
+		$scheduled_tweet_history[$schedule_id]['time'] = $scheduled_tweets[$schedule_id]['time'];
+		$scheduled_tweet_history[$schedule_id]['status'] = $status;
+		unset($scheduled_tweets[$schedule_id]);
+		
+		/*
+		* Update options
+		*/
+		update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
+		update_option('azrcrv-tt-scheduled-tweet-history', $scheduled_tweet_history);
+	}
+	
+}
+add_action( 'azrcrv_tt_scheduled_tweet', 'azrcrv_tt_send_scheduled_tweet', 10, 3 );
 
 /**
  * Schedule Sunday cron event.
