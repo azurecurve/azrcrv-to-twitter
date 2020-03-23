@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -39,14 +39,15 @@ use Abraham\TwitterOAuth\TwitterOAuth;
  * @since 1.0.0
  *
  */
-// registere activation hooks
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_monday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_tuesday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_wednesday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_thursday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_friday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_saturday' );
-register_activation_hook( __FILE__, 'azrcrv_tt_schedule_post_tweet_sunday' );
+// register activation hook
+register_activation_hook(__FILE__, 'azrcrv_tt_set_default_options');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_monday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_tuesday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_wednesday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_thursday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_friday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_saturday');
+register_activation_hook(__FILE__, 'azrcrv_tt_schedule_post_tweet_sunday');
 
 // add actions
 add_action('admin_menu', 'azrcrv_tt_create_admin_menu');
@@ -94,11 +95,65 @@ function azrcrv_tt_set_default_options($networkwide){
 	$option_name = 'azrcrv-tt';
 	
 	$new_options = array(
-						'access_key' => '',
-						'access_secret' => '',
-						'access_token' => '',
-						'access_token_secret' => '',
-			);
+							'access_key' => '',
+							'access_secret' => '',
+							'access_token' => '',
+							'access_token_secret' => '',
+							'default_autopost' => 0,
+							'record_tweet_history' => 1,
+							'category-hashtags' => array(),
+							'tag-hashtags' => array(),
+							'word-replacement' => array(),
+							'scheduled-post' => array(
+														0 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														1 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														2 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														3 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														4 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														5 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+														6 => array(
+																	'time' => '11:00',
+																	'filter' => 'Is',
+																	'category' => '',
+																	'enabled' => 0,
+																),
+													),
+							'scheduled-tweet-generate' => 0,
+							'scheduled-tweet-prefix' => 'ICYMI:',
+							'scheduled-tweet-suffix' => 0,
+							'newest-post-age' => 181,
+							'excluded-tags' => array(),
+						);
 	
 	// set defaults for multi-site
 	if (function_exists('is_multisite') && is_multisite()){
@@ -216,8 +271,7 @@ function azrcrv_tt_create_admin_menu(){
  *
  */
 function azrcrv_tt_add_sidebar_metabox(){
-	
-	add_meta_box('azrcrv-tt-box', esc_html__('Autopost Tweet', 'to-twitter'), 'azrcrv_tt_generate_sidebar_metabox', 'post', 'side', $options['priority']);	
+	add_meta_box('azrcrv-tt-box', esc_html__('Autopost Tweet', 'to-twitter'), 'azrcrv_tt_generate_sidebar_metabox', 'post', 'side', 'default');	
 }
 
 /**
@@ -392,8 +446,7 @@ function azrcrv_tt_render_post_tweet_metabox() {
 								value="<?php echo esc_attr( $azrcrv_tt_post_tweet ); ?>"
 							><br />
 							<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%s</strong>'); ?><br />
-							<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?><br />
-							<?php printf(__('Twitter does not allow duplicate tweets so to retweet you need to make a change.', 'to-twitter'), '%s'); ?>
+							<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
 							
 							<p>
 							<?php
