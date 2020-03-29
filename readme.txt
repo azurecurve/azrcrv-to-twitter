@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
-Version:		1.4.1
+Version:		1.5.0
 Tags:			tweets,twitter,automatic
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.4.1/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.5.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -64,6 +64,10 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.5.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.5.0)
+ * Add scheduled tweet of random page.
+ * Add option to exclude individual posts or pages from random scheduled tweets.
 
 ### [Version 1.4.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.4.1)
  * Fix bug with setting of default options.

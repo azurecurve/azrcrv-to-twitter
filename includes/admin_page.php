@@ -32,6 +32,7 @@
 		<a class="nav-tab" data-item=".tabs-4" href="#tabs-4"><?php _e('Tag Hashtags', 'to-twitter') ?></a>
 		<a class="nav-tab" data-item=".tabs-5" href="#tabs-5"><?php _e('Word Replace', 'to-twitter') ?></a>
 		<a class="nav-tab" data-item=".tabs-6" href="#tabs-6"><?php _e('Schedule Random Post', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-7" href="#tabs-7"><?php _e('Schedule Random Page', 'to-twitter') ?></a>
 		<input type="submit" style="float: left; margin: 6px; margin-bottom: 3px " value="<?php _e('Save Settings', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit" />
 	</h2>
 
@@ -52,6 +53,7 @@
 		<div class="azrcrv_tt_tabs <?php if ($showappsettings == true){ echo 'invisible'; } ?> tabs-2">
 			<p class="azrcrv_tt_horiz">
 				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php _e('Autopost new posts?', 'to-twitter'); ?></label></p>
+				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php _e('Autopost new pages?', 'to-twitter'); ?></label></p>
 				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $options['record_tweet_history']); ?> /><?php _e('Record tweet history?', 'to-twitter'); ?></label></p>
 			</p>
 		</div>
@@ -221,7 +223,7 @@
 					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Select tweets at least this many days old','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php _e('Select posts at least this many days old','to-twitter') ?>:</span><br/>
 					<select name="newest-post-age">
 						<?php
 							for ($ageloop = 0; $ageloop <= 365; $ageloop++){
@@ -230,7 +232,7 @@
 								}else{
 									$selected = '';
 								}
-								echo	'<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
 							}
 						?>
 					</select>
@@ -241,11 +243,11 @@
 				<tr><th><?php _e('Tag', 'to-twitter'); ?></th><th><?php _e('Exclude', 'to-twitter'); ?></th></tr>
 				<?php
 				$tags = get_tags(
-												array(
-													'orderby' => 'name',
-													'hide_empty' => false,
-												)
-											);
+									array(
+										'orderby' => 'name',
+										'hide_empty' => false,
+									)
+								);
 				
 				foreach ($tags as $tag) {
 					echo '<tr>';
@@ -264,6 +266,108 @@
 				}
 				?>
 				</table></p>
+			</p>
+		</div>
+		
+		<div class="azrcrv_tt_tabs invisible tabs-7">
+			<p class="azrcrv_tt_horiz">
+				<p><span class="description"><?php _e('Due to the limitations of the WP Cron process, a scheduled tweet will only be sent if the site receives a visit on or after the scheduled time; this does mean a tweet scheduled for Monday at 10:00 woould, if a visitor first arrived at 21:09, get tweeted at that time. If there is no visitor on a day when a tweet is scheduled, then no tweet will be sent.','to-twitter') ?></span></p>
+				
+				<h4><?php _e('Schedule', 'to-twitter'); ?></h4>
+				<p><table>
+				<tr><th><?php _e('Day', 'to-twitter'); ?></th><th><?php _e('Time', 'to-twitter'); ?></th><th><?php _e('Filter', 'to-twitter'); ?></th><th><?php _e('Post Content', 'to-twitter'); ?></th><th><?php _e('Enable', 'to-twitter'); ?></th></tr>
+				<?php
+				
+				$days = array(
+								0 => 'Sunday',
+								1 => 'Monday',
+								2 => 'Tuesday',
+								3 => 'Wednesday',
+								4 => 'Thursday',
+								5 => 'Friday',
+								6 => 'Saturday',
+							);
+				
+				for ($dayloop = 0; $dayloop < 7; $dayloop++){
+					echo '<tr>';
+						// day
+						echo '<td>'.$days[$dayloop].'</td>';
+						// time
+						echo '<td>';
+							echo '<select name="scheduled-page['.$dayloop.'][time]">';
+								for ($timeloop = 0; $timeloop < 24; $timeloop++){
+									$time = substr('0'.$timeloop,-2);
+									$selected_00 = '';
+									$selected_30 = '';
+									if ($options['scheduled-page'][$dayloop]['time'] == $time.':00'){
+										$selected_00 = 'selected';
+									}elseif ($options['scheduled-page'][$dayloop]['time'] == $time.':30'){
+										$selected_30 = 'selected';
+									}
+									echo '<option value="'.$time.':00" '.$selected_00.' >'.$time.':00</option>';
+									echo '<option value="'.$time.':30" '.$selected_30.' >'.$time.':30</option>';
+								}
+							echo '</select>';
+						echo '</td>';
+						// filter
+						echo '<td>';
+							echo '<select name="scheduled-page['.$dayloop.'][filter]">';
+								if ($options['scheduled-page'][$dayloop]['filter'] == 'Contains'){
+									$selected_contains = 'selected';
+									$selected_doesnotcontain = '';
+								}else{
+									$selected_contains = '';
+									$selected_doesnotcontain = 'selected';
+								}
+								echo '<option value="Contains" '.$selected_contains.' >Contains</option>';
+								echo '<option value="Does Not Contain" '.$selected_doesnotcontain.' >Does Not Contain</option>';
+							echo	'</select>';
+						echo '</td>';
+						// category
+						echo '<td>';
+							echo '<input type="text" name="scheduled-page['.$dayloop.'][textcontains]" class="short-text" value="'.$options['scheduled-page'][$dayloop]['textcontains'].'" style="margin-top: 12px; "></p>';
+						echo '</td>';
+						// enabled
+						echo '<td>';
+							if ($options['scheduled-page'][$dayloop]['enabled'] == 1){
+								$checked = 'checked';
+							}else{
+								$checked = '';
+							}
+							echo '<input name="scheduled-page['.$dayloop.'][enabled]" type="checkbox" id="scheduled-page['.$dayloop.'][enabled]" value="1" '.$checked.' />';
+						echo '</td>';
+					echo '</tr>';
+				}
+				?>
+				</table></p>
+				
+				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
+				<p>
+					<label for="scheduled-page-tweet-generate"><input name="scheduled-page-tweet-generate" type="checkbox" id="scheduled-page-tweet-generate" value="1" <?php checked('1', $options['scheduled-page-tweet-generate']); ?> /><?php _e('Generate new tweet?', 'to-twitter'); ?></label>
+				</p>
+				<p>
+					<p><span class="description"><?php _e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
+					<input type="text" name="scheduled-page-tweet-prefix" class="short-text" value="<?php echo $options['scheduled-page-tweet-prefix']; ?>"></p>
+				</p>
+				<p>
+					<label for="scheduled-page-tweet-suffix"><input name="scheduled-page-tweet-suffix" type="checkbox" id="scheduled-page-tweet-suffix" value="1" <?php checked('1', $options['scheduled-page-tweet-suffix']); ?> /><?php _e('Include numeric suffix?', 'to-twitter'); ?></label><br />
+					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
+				</p>
+				<p>
+					<p><span class="description"><?php _e('Select pages at least this many days old','to-twitter') ?>:</span><br/>
+					<select name="newest-page-age">
+						<?php
+							for ($ageloop = 0; $ageloop <= 365; $ageloop++){
+								if ($options['newest-page-age'] == $ageloop){
+									$selected = 'selected';
+								}else{
+									$selected = '';
+								}
+								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+							}
+						?>
+					</select>
+				</p>
 			</p>
 		</div>
 	</div>
