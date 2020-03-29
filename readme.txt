@@ -2,7 +2,7 @@
 
 Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
 Version:		1.5.0
-Tags:			tweets,twitter,automatic
+Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/

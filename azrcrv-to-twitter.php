@@ -1,5 +1,5 @@
 <?php
-/**
+/** 
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
@@ -161,6 +161,54 @@ function azrcrv_tt_set_default_options($networkwide){
 							'scheduled-tweet-suffix' => 0,
 							'newest-post-age' => 181,
 							'excluded-tags' => array(),
+							'scheduled-page' => array(
+														0 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														1 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														2 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														3 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														4 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														5 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+														6 => array(
+																	'time' => '15:00',
+																	'filter' => 'Contains',
+																	'textcontains' => '',
+																	'enabled' => 0,
+																),
+													),
+							'scheduled-page-tweet-generate' => 0,
+							'scheduled-page-tweet-prefix' => 'ICYMI:',
+							'scheduled-page-tweet-suffix' => 0,
+							'newest-page-age' => 0,
 						);
 	
 	// set defaults for multi-site
