@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.5.0
+ * Version: 1.6.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -109,6 +109,7 @@ function azrcrv_tt_set_default_options($networkwide){
 							'default_autopost' => 0,
 							'default_autopost_page' => 0,
 							'record_tweet_history' => 1,
+							'prefix_tweets_with_dot' => 1,
 							'category-hashtags' => array(),
 							'tag-hashtags' => array(),
 							'word-replacement' => array(),
@@ -593,12 +594,18 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 				
 		$url = '%s';
 		
+		if ($options['prefix_tweets_with_dot'] == 1){
+			if (substr($tweet, 0, 1) == '@'){
+				$tweet = '.'.$tweet;
+			}
+		}
+		
 		$post_tweet = $tweet.' '.$url.' '.$additional_hashtags_string; //text for your tweet.
 	}else{
 		/**
 		 * Sanitize the submitted data
 		 */
-		$post_tweet = wp_filter_post_kses( $_POST['azrcrv_tt_post_tweet'] );
+		$post_tweet = sanitize_text_field( $_POST['post_tweet'] );
 	}
 	// Save our submissions to the database
 	update_post_meta( $post->ID, '_azrcrv_tt_post_tweet', $post_tweet );
@@ -754,6 +761,12 @@ function azrcrv_tt_save_options(){
 			$options[$option_name] = 0;
 		}
 		$option_name = 'record_tweet_history';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		$option_name = 'prefix_tweets_with_dot';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
 		}else{
@@ -1497,6 +1510,13 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 		}else{
 			$url = get_permalink($post_id);
 		}
+		
+		if ($options['prefix_tweets_with_dot'] == 1){
+			if (substr($tweet, 0, 1) == '@'){
+				$tweet = '.'.$tweet;
+			}
+		}
+		
 		$tweet = $tweet.' '.$url.$additional_hashtags_string;
 	}else{
 		$tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);

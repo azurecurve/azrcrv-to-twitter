@@ -39,14 +39,14 @@
 	<div>
 		<div class="azrcrv_tt_tabs <?php if ($showappsettings == false){ echo 'invisible'; } ?> tabs-1">
 			<p class="azrcrv_tt_horiz">
-			<p><span class="description"><?php _e('Consumer key','to-twitter') ?>:</span><br/>
-			<input type="text" name="access_key" class="regular-text" value="<?php echo $options['access_key']; ?>"></p>
-			<p> <span class="description"><?php _e('Consumer secret','to-twitter') ?>:</span><br/>
-			<input type="text" name="access_secret" class="regular-text" value="<?php echo $options['access_secret']; ?>"></p>
-			<p><span class="description"><?php _e('Access token','to-twitter') ?>:</span><br/>
-			<input type="text" name="access_token" class="regular-text" value="<?php echo $options['access_token']; ?>"></p>
-			<p><span class="description"><?php _e('Access token secret','to-twitter') ?>:</span><br/>
-			<input type="text" name="access_token_secret" class="regular-text" value="<?php echo $options['access_token_secret']; ?>"></p>
+				<p><span class="description"><?php _e('Consumer key','to-twitter') ?>:</span><br/>
+				<input type="text" name="access_key" class="regular-text" value="<?php echo $options['access_key']; ?>"></p>
+				<p> <span class="description"><?php _e('Consumer secret','to-twitter') ?>:</span><br/>
+				<input type="text" name="access_secret" class="regular-text" value="<?php echo $options['access_secret']; ?>"></p>
+				<p><span class="description"><?php _e('Access token','to-twitter') ?>:</span><br/>
+				<input type="text" name="access_token" class="regular-text" value="<?php echo $options['access_token']; ?>"></p>
+				<p><span class="description"><?php _e('Access token secret','to-twitter') ?>:</span><br/>
+				<input type="text" name="access_token_secret" class="regular-text" value="<?php echo $options['access_token_secret']; ?>"></p>
 			</p>
 		</div>
 		
@@ -55,6 +55,7 @@
 				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php _e('Autopost new posts?', 'to-twitter'); ?></label></p>
 				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php _e('Autopost new pages?', 'to-twitter'); ?></label></p>
 				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $options['record_tweet_history']); ?> /><?php _e('Record tweet history?', 'to-twitter'); ?></label></p>
+				<p><label for="prefix_tweets_with_dot"><input name="prefix_tweets_with_dot" type="checkbox" id="prefix_tweets_with_dot" value="1" <?php checked('1', $options['prefix_tweets_with_dot']); ?> /><?php _e('Prefix tweets with a dot which start with @?', 'to-twitter'); ?></label></p>
 			</p>
 		</div>
 		
