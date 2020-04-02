@@ -27,7 +27,7 @@
 
 	<h2 class="nav-tab-wrapper nav-tab-wrapper-azrcrv-tt">
 		<a class="nav-tab <?php if ($showappsettings == true){ echo 'nav-tab-active'; } ?>" data-item=".tabs-1" href="#tabs-1"><?php _e('App Settings', 'to-twitter') ?></a>
-		<a class="nav-tab <?php if ($showappsettings == false){ echo 'nav-tab-active'; } ?>" data-item=".tabs-2" href="#tabs-2"><?php _e('Default Settings', 'to-twitter') ?></a>
+		<a class="nav-tab <?php if ($showappsettings == false){ echo 'nav-tab-active'; } ?>" data-item=".tabs-2" href="#tabs-2"><?php _e('Tweet Settings', 'to-twitter') ?></a>
 		<a class="nav-tab" data-item=".tabs-3" href="#tabs-3"><?php _e('Category Hashtags', 'to-twitter') ?></a>
 		<a class="nav-tab" data-item=".tabs-4" href="#tabs-4"><?php _e('Tag Hashtags', 'to-twitter') ?></a>
 		<a class="nav-tab" data-item=".tabs-5" href="#tabs-5"><?php _e('Word Replace', 'to-twitter') ?></a>
@@ -41,10 +41,13 @@
 			<p class="azrcrv_tt_horiz">
 				<p><span class="description"><?php _e('Consumer key','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_key" class="regular-text" value="<?php echo $options['access_key']; ?>"></p>
+				
 				<p> <span class="description"><?php _e('Consumer secret','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_secret" class="regular-text" value="<?php echo $options['access_secret']; ?>"></p>
+				
 				<p><span class="description"><?php _e('Access token','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_token" class="regular-text" value="<?php echo $options['access_token']; ?>"></p>
+				
 				<p><span class="description"><?php _e('Access token secret','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_token_secret" class="regular-text" value="<?php echo $options['access_token_secret']; ?>"></p>
 			</p>
@@ -52,10 +55,140 @@
 		
 		<div class="azrcrv_tt_tabs <?php if ($showappsettings == true){ echo 'invisible'; } ?> tabs-2">
 			<p class="azrcrv_tt_horiz">
+			
+				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
+				
+				<?php
+					if (isset($options['prefix_tweets_with_dot'])){
+						$prefix_tweets_with_dot = $options['prefix_tweets_with_dot'];
+					}else{
+						$prefix_tweets_with_dot = '';
+					}
+				?>
+				<p><label for="prefix_tweets_with_dot"><input name="prefix_tweets_with_dot" type="checkbox" id="prefix_tweets_with_dot" value="1" <?php checked('1', $prefix_tweets_with_dot); ?> /><?php _e('Prefix tweets with a dot which start with @?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['record_tweet_history'])){
+						$record_tweet_history = $options['record_tweet_history'];
+					}else{
+						$record_tweet_history = '';
+					}
+				?>
+				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $record_tweet_history); ?> /><?php _e('Record tweet history?', 'to-twitter'); ?></label></p>
+				
+				<h4><?php _e('Post Settings', 'to-twitter'); ?></h4>
+				
 				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php _e('Autopost new posts?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['default-autopost-after-delay'])){
+						$default_autopost_after_delay = $options['default-autopost-after-delay'];
+					}else{
+						$default_autopost_after_delay = '';
+					}
+				?>
+				<p><label for="default-autopost-after-delay"><input name="default-autopost-after-delay" type="checkbox" id="default-autopost-after-delay" value="1" <?php checked('1', $default_autopost_after_delay); ?> /><?php _e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['default-autopost-delay-prefix'])){
+						$default_autopost_delay_prefix = $options['default-autopost-delay-prefix'];
+					}else{
+						$default_autopost_delay_prefix = '';
+					}
+				?>
+				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
+				<input type="text" name="default-autopost-delay-prefix" class="short-text" value="<?php echo $default_autopost_delay_prefix; ?>"></p>
+				
+				<p>
+					<span class="description"><?php _e('Select delay duration','to-twitter') ?>:</span><br/>
+					<select name="default-autopost-delay-number">
+						<?php
+							if (!isset($options['default-autopost-delay-number'])){ $options['default-autopost-delay-number'] = 30; }
+							for ($ageloop = 1; $ageloop <= 60; $ageloop++){
+								if ($options['default-autopost-delay-number'] == $ageloop){
+									$selected = 'selected';
+								}else{
+									$selected = '';
+								}
+								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+							}
+						?>
+					</select>
+					<select name="default-autopost-delay-unit">
+						<?php
+							if ($options['default-autopost-delay-unit'] == 'days'){
+								echo '<option value="minutes" >minutes</option>';
+								echo '<option value="hours" >hours</option>';
+								echo '<option value="days" selected >days</option>';
+							}elseif ($options['default-autopost-delay-unit'] == 'hours'){
+								echo '<option value="minutes" >minutes</option>';
+								echo '<option value="hours" selected >hours</option>';
+								echo '<option value="days" >days</option>';
+							}else{ // minutes
+								echo '<option value="minutes" selected >minutes</option>';
+								echo '<option value="hours" >hours</option>';
+								echo '<option value="days" >days</option>';
+							}
+						?>
+					</select>
+				</p>
+				
+				<h4><?php _e('Page Settings', 'to-twitter'); ?></h4>
+				
 				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php _e('Autopost new pages?', 'to-twitter'); ?></label></p>
-				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $options['record_tweet_history']); ?> /><?php _e('Record tweet history?', 'to-twitter'); ?></label></p>
-				<p><label for="prefix_tweets_with_dot"><input name="prefix_tweets_with_dot" type="checkbox" id="prefix_tweets_with_dot" value="1" <?php checked('1', $options['prefix_tweets_with_dot']); ?> /><?php _e('Prefix tweets with a dot which start with @?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['default-autopost-page-after-delay'])){
+						$default_autopost_page_after_delay = $options['default-autopost-page-after-delay'];
+					}else{
+						$default_autopost_page_after_delay = '';
+					}
+				?>
+				<p><label for="default-autopost-page-after-delay"><input name="default-autopost-page-after-delay" type="checkbox" id="default-autopost-page-after-delay" value="1" <?php checked('1', $default_autopost_page_after_delay); ?> /><?php _e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['default-autopost-page-delay-prefix'])){
+						$default_autopost_page_delay_prefix = $options['default-autopost-page-delay-prefix'];
+					}else{
+						$default_autopost_page_delay_prefix = '';
+					}
+				?>
+				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
+				<input type="text" name="default-autopost-page-delay-prefix" class="short-text" value="<?php echo $default_autopost_page_delay_prefix; ?>"></p>
+				
+				<p>
+					<span class="description"><?php _e('Select delay duration','to-twitter') ?>:</span><br/>
+					<select name="default-autopost-page-delay-number">
+						<?php
+							if (!isset($options['default-autopost-page-delay-number'])){ $options['default-autopost-page-delay-number'] = 59; }
+							for ($ageloop = 1; $ageloop <= 60; $ageloop++){
+								if ($options['default-autopost-page-delay-number'] == $ageloop){
+									$selected = 'selected';
+								}else{
+									$selected = '';
+								}
+								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+							}
+						?>
+					</select>
+					<select name="default-autopost-page-delay-unit">
+						<?php
+							if ($options['default-autopost-page-delay-unit'] == 'days'){
+								echo '<option value="minutes" >minutes</option>';
+								echo '<option value="hours" >hours</option>';
+								echo '<option value="days" selected >days</option>';
+							}elseif ($options['default-autopost-page-delay-unit'] == 'hours'){
+								echo '<option value="minutes" >minutes</option>';
+								echo '<option value="hours" selected >hours</option>';
+								echo '<option value="days" >days</option>';
+							}else{ // minutes
+								echo '<option value="minutes" selected >minutes</option>';
+								echo '<option value="hours" >hours</option>';
+								echo '<option value="days" >days</option>';
+							}
+						?>
+					</select>
+				</p>
 			</p>
 		</div>
 		
@@ -74,7 +207,12 @@
 												);
 					
 					foreach ($categories as $category) {
-						echo '<tr><td>'.$category->name.'</td><td><input type="text" name="category-hashtags['.$category->term_id.']" class="regular-text" value="'.$options['category-hashtags'][$category->term_id].'"></td></tr>';
+						if (isset($options['category-hashtags'][$category->term_id])){
+							$category_hashtags = $options['category-hashtags'][$category->term_id];
+						}else{
+							$category_hashtags = '';
+						}
+						echo '<tr><td>'.$category->name.'</td><td><input type="text" name="category-hashtags['.$category->term_id.']" class="regular-text" value="'.$category_hashtags.'"></td></tr>';
 					}
 					?>
 				</table>
@@ -96,7 +234,12 @@
 												);
 					
 					foreach ($tags as $tag) {
-						echo '<tr><td>'.$tag->name.'</td><td><input type="text" name="tag-hashtags['.$tag->term_id.']" class="regular-text" value="'.$options['tag-hashtags'][$tag->term_id].'"></td></tr>';
+						if (isset($options['tag-hashtags'][$category->term_id])){
+							$tag_hashtags = $options['tag-hashtags'][$category->term_id];
+						}else{
+							$tag_hashtags = '';
+						}
+						echo '<tr><td>'.$tag->name.'</td><td><input type="text" name="tag-hashtags['.$tag->term_id.']" class="regular-text" value="'.$tag_hashtags.'"></td></tr>';
 					}
 					?>
 				</table>
@@ -199,7 +342,7 @@
 					echo '</td>';
 					// enabled
 					echo '<td>';
-						if ($options['scheduled-post'][$dayloop]['enabled'] == 1){
+						if (isset($options['scheduled-post'][$dayloop]['enabled']) AND $options['scheduled-post'][$dayloop]['enabled'] == 1){
 							$checked = 'checked';
 						}else{
 							$checked = '';
@@ -213,7 +356,14 @@
 				
 				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
 				<p>
-					<label for="scheduled-tweet-generate"><input name="scheduled-tweet-generate" type="checkbox" id="scheduled-tweet-generate" value="1" <?php checked('1', $options['scheduled-tweet-generate']); ?> /><?php _e('Generate new tweet?', 'to-twitter'); ?></label>
+					<?php
+						if (isset($options['scheduled-tweet-generate'])){
+							$scheduled_tweet_generate = $options['scheduled-tweet-generate'];
+						}else{
+							$scheduled_tweet_generate = 0;
+						}
+					?>
+					<label for="scheduled-tweet-generate"><input name="scheduled-tweet-generate" type="checkbox" id="scheduled-tweet-generate" value="1" <?php checked('1', $scheduled_tweet_generate); ?> /><?php _e('Generate new tweet?', 'to-twitter'); ?></label>
 				</p>
 				<p>
 					<p><span class="description"><?php _e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
@@ -237,6 +387,7 @@
 							}
 						?>
 					</select>
+					</p>
 				</p>
 				
 				<h4><?php _e('Select tags which should not be included in scheduled tweets:', 'to-twitter'); ?></h4>
@@ -256,7 +407,7 @@
 							echo $tag->name;
 						echo '</td>';
 						echo '<td>';
-							if ($options['excluded-tags'][$tag->term_id] == 1){
+							if (isset($options['excluded-tags'][$tag->term_id]) AND $options['excluded-tags'][$tag->term_id] == 1){
 								$checked = 'checked';
 							}else{
 								$checked = '';

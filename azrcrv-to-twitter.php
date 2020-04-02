@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.6.0
+ * Version: 1.7.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -107,7 +107,15 @@ function azrcrv_tt_set_default_options($networkwide){
 							'access_token' => '',
 							'access_token_secret' => '',
 							'default_autopost' => 0,
+							'default-autopost-after-delay' => 0,
+							'default-autopost-delay-prefix' => 'ICYMI:',
+							'default-autopost-delay-number' => 1,
+							'default-autopost-delay-unit' => 'hour',
 							'default_autopost_page' => 0,
+							'default-autopost-page-after-delay' => 0,
+							'default-autopost-page-delay-prefix' => 'ICYMI:',
+							'default-autopost-page-delay-number' => 1,
+							'default-autopost-page-delay-unit' => 'day',
 							'record_tweet_history' => 1,
 							'prefix_tweets_with_dot' => 1,
 							'category-hashtags' => array(),
@@ -352,6 +360,17 @@ function azrcrv_tt_generate_sidebar_metabox(){
 			$autopost = $options['default_autopost_page'];
 		}
 	}
+	
+	if(metadata_exists('post', $post->ID, '_azrcrv_tt_autopost_after_delay')) {
+		$autopost_after_delay = get_post_meta($post->ID, '_azrcrv_tt_autopost_after_delay', true);
+	}else{
+		if ($post->post_type == 'post'){
+			$autopost_after_delay = $options['default-autopost-after-delay'];
+		}else{
+			$autopost_after_delay = $options['default-autopost-page-after-delay'];
+		}
+	}
+	
 	$tweeted = get_post_meta($post->ID, '_azrcrv_tt_tweeted', true);
 	?>
 	<p class="autopost">
@@ -365,7 +384,6 @@ function azrcrv_tt_generate_sidebar_metabox(){
 		}
 		?>
 		<p><input type="checkbox" name="autopost" <?php if( $autopost == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post tweet on publish/update?', 'to-twitter'); ?></p>
-		<p><input type="checkbox" name="exclude-schedule" <?php if( $exclude-schedule == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Exclude from schedule', 'to-twitter'); ?></p>
 		<p>
 			<label for="hashtags">Hashtags</label><br/>
 			<?php
@@ -376,6 +394,10 @@ function azrcrv_tt_generate_sidebar_metabox(){
 			?>
 			<input name="hashtags" type="text" style="width: 100%;" value="<?php echo $hashtags; ?>" />
 		</p>
+		
+		<p><input type="checkbox" name="autopost-after-delay" <?php if( $autopost_after_delay == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post retweet on delay after post/update?', 'to-twitter'); ?></p>
+		
+		<p><input type="checkbox" name="exclude-schedule" />  <?php esc_html_e('Exclude from schedule', 'to-twitter'); ?></p>
 	</p>
 	
 <?
@@ -420,16 +442,8 @@ function azrcrv_tt_get_hashtags($post_id){
 		}
 		
 		sort($hashtags);
+		$newhashtags = array_unique($hashtags);
 		
-		$lasthashtag = '';
-		$newhashtags = array();
-		
-		foreach($hashtags as $hashtag){
-			if ($hashtag != $lasthashtag){
-				$newhashtags[] = $hashtag;
-			}
-			$lasthashtag = $hashtag;
-		}
 		return implode(' ', $newhashtags);
 	}
 }
@@ -461,12 +475,21 @@ function azrcrv_tt_save_sidebar_metabox($post_id){
 		}else{
 			$autopost = 0;
 		}
+		
+		if (isset($_POST['autopost-after-delay'])){
+			$autopost_after_delay = 1;
+		}else{
+			$autopost_after_delay = 0;
+		}
+		
 		if (isset($_POST['exclude-schedule'])){
 			$exclude = 1;
 		}else{
 			$exclude = 0;
 		}
+		
 		update_post_meta($post_id, '_azrcrv_tt_autopost', $autopost);
+		update_post_meta($post_id, '_azrcrv_tt_autopost_after_delay', $autopost_after_delay);
 		update_post_meta($post_id, '_azrcrv_tt_exclude_schedule', $exclude);
 		update_post_meta($post_id, '_azrcrv_tt_hashtags', esc_attr($_POST['hashtags']));
 	}
@@ -660,8 +683,8 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 					$options = get_option('azrcrv-tt');
 					
 					if ($options['record_tweet_history'] == 1){
-						$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));	
-						if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
+						$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
+						if (metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
 
 							$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
 							$tweet_history[$dateTime] = $post_tweet;
@@ -670,6 +693,58 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 						} else {
 							update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
 						}
+					}
+					
+					/* send icymi */
+					$autopost_after_delay = get_post_meta($post_id, '_azrcrv_tt_autopost_after_delay', true);
+					if ($autopost_after_delay == 1){
+						$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
+						$schedule_id = $post_id;
+						$icymi_date = date("Y-m-d H:i:s");
+						$icymi_date = strtotime($icymi_date);
+						
+						$prefix = '';
+						if (get_post_type($schedule_id) === 'post') {
+							$prefix = $options['default-autopost-delay-prefix'];
+							
+							$number = $options['default-autopost-delay-number'];
+						
+							if ($options['default-autopost-delay-unit'] == 'minutes'){
+								$multiplier = 60;
+							}elseif ($options['default-autopost-delay-unit'] == 'hours'){
+								$multiplier = 3600;
+							}else{
+								$multiplier = 86400;
+							}
+						}else{
+							$prefix = $options['default-autopost-delay-prefix'];
+							
+							$number = $options['default-autopost-page-delay-number'];
+						
+							if ($options['default-autopost-page-delay-unit'] == 'minutes'){
+								$multiplier = 60;
+							}elseif ($options['default-autopost-page-delay-unit'] == 'hours'){
+								$multiplier = 3600;
+							}else{
+								$multiplier = 86400;
+							}
+						}
+						if (strlen($prefix) > 0){ $prefix .= ' '; }
+	 
+						$icymi_date = $icymi_date + ($multiplier * $number);
+						$schedule_id .= '-'.date('Y-m-d H:i', $icymi_date);
+						
+						$scheduled_tweets[$schedule_id]['tweet'] = 'ICYMI: '.$post_tweet;
+						$scheduled_tweets[$schedule_id]['date'] = date("Y-m-d", $icymi_date);
+						$scheduled_tweets[$schedule_id]['time'] = date("H:i", $icymi_date);
+						
+						wp_schedule_single_event(strtotime(
+														date("Y-m-d H:i", $icymi_date)
+														), 'azrcrv_tt_scheduled_tweet', array($schedule_id) 
+													);
+			
+						
+						update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
 					}
 				}
 			}
@@ -748,13 +823,8 @@ function azrcrv_tt_save_options(){
 		$options['access_secret'] = sanitize_text_field($_POST['access_secret']);
 		$options['access_token'] = sanitize_text_field($_POST['access_token']);
 		$options['access_token_secret'] = sanitize_text_field($_POST['access_token_secret']);
-		$option_name = 'default_autopost';
-		if (isset($_POST[$option_name])){
-			$options[$option_name] = 1;
-		}else{
-			$options[$option_name] = 0;
-		}
-		$option_name = 'default_autopost_page';
+		
+		$option_name = 'prefix_tweets_with_dot';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
 		}else{
@@ -766,12 +836,44 @@ function azrcrv_tt_save_options(){
 		}else{
 			$options[$option_name] = 0;
 		}
-		$option_name = 'prefix_tweets_with_dot';
+		
+		$option_name = 'default_autopost';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
 		}else{
 			$options[$option_name] = 0;
 		}
+		$option_name = 'default-autopost-after-delay';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		$option_name = 'default-autopost-delay-prefix';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$option_name = 'default-autopost-delay-number';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$option_name = 'default-autopost-delay-unit';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		
+		$option_name = 'default_autopost_page';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		$option_name = 'default-autopost-page-after-delay';
+		if (isset($_POST[$option_name])){
+			$options[$option_name] = 1;
+		}else{
+			$options[$option_name] = 0;
+		}
+		$option_name = 'default-autopost-page-delay-prefix';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$option_name = 'default-autopost-page-delay-number';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$option_name = 'default-autopost-page-delay-unit';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		
 		/*
 		* Update category hashtags
@@ -1170,21 +1272,42 @@ function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
 	$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
 	
 	if (isset($scheduled_tweets[$schedule_id]['tweet'])){ // AND $token_error != true) {
-		$scheduled_tweet_history = get_option('azrcrv-tt-scheduled-tweet-history');
 		
 		$status = azrcrv_tt_post_tweet($scheduled_tweets[$schedule_id][tweet]);
 		
-		$scheduled_tweet_history[$schedule_id]['tweet'] = $scheduled_tweets[$schedule_id]['tweet'];
-		$scheduled_tweet_history[$schedule_id]['date'] = $scheduled_tweets[$schedule_id]['date'];
-		$scheduled_tweet_history[$schedule_id]['time'] = $scheduled_tweets[$schedule_id]['time'];
-		$scheduled_tweet_history[$schedule_id]['status'] = $status;
+		$schedule = explode('-', $schedule_id);
+		$post_id = $schedule[0];
+		if (get_post_status($post_id)){
+			$options = get_option('azrcrv-tt');
+			
+			if ($options['record_tweet_history'] == 1){
+				$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
+				if (metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
+
+					$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+					$tweet_history[$dateTime] = $scheduled_tweets[$schedule_id]['tweet'];
+					update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+
+				} else {
+					update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $scheduled_tweets[$schedule_id]['tweet']));   
+				}
+			}
+		}else{
+			$scheduled_tweet_history = get_option('azrcrv-tt-scheduled-tweet-history');
+			$scheduled_tweet_history[$schedule_id]['tweet'] = $scheduled_tweets[$schedule_id]['tweet'];
+			$scheduled_tweet_history[$schedule_id]['date'] = $scheduled_tweets[$schedule_id]['date'];
+			$scheduled_tweet_history[$schedule_id]['time'] = $scheduled_tweets[$schedule_id]['time'];
+			$scheduled_tweet_history[$schedule_id]['status'] = $status;
+			
+			update_option('azrcrv-tt-scheduled-tweet-history', $scheduled_tweet_history);
+		}
+		
 		unset($scheduled_tweets[$schedule_id]);
 		
 		/*
 		* Update options
 		*/
 		update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
-		update_option('azrcrv-tt-scheduled-tweet-history', $scheduled_tweet_history);
 	}
 	
 }
