@@ -93,7 +93,7 @@
 					if (isset($options['default-autopost-delay-prefix'])){
 						$default_autopost_delay_prefix = $options['default-autopost-delay-prefix'];
 					}else{
-						$default_autopost_delay_prefix = '';
+						$default_autopost_delay_prefix = 'ICYMI:';
 					}
 				?>
 				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
@@ -150,7 +150,7 @@
 					if (isset($options['default-autopost-page-delay-prefix'])){
 						$default_autopost_page_delay_prefix = $options['default-autopost-page-delay-prefix'];
 					}else{
-						$default_autopost_page_delay_prefix = '';
+						$default_autopost_page_delay_prefix = 'ICYMI:';
 					}
 				?>
 				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
