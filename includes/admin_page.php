@@ -234,8 +234,8 @@
 												);
 					
 					foreach ($tags as $tag) {
-						if (isset($options['tag-hashtags'][$category->term_id])){
-							$tag_hashtags = $options['tag-hashtags'][$category->term_id];
+						if (isset($options['tag-hashtags'][$tag->term_id])){
+							$tag_hashtags = $options['tag-hashtags'][$tag->term_id];
 						}else{
 							$tag_hashtags = '';
 						}
