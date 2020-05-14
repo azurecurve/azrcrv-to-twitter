@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.7.2
+ * Version: 1.7.3
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -2132,7 +2132,7 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 		}else{
 			$url = get_permalink($post_id);
 		}
-		$tweet = $tweet.' '.$url.$additional_hashtags_string;
+		$tweet = $tweet.' '.$url.' '.$additional_hashtags_string;
 	}else{
 		$tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
 	}
