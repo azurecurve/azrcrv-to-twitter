@@ -272,7 +272,7 @@
 				
 				<h4><?php _e('Schedule', 'to-twitter'); ?></h4>
 				<p><table>
-				<tr><th><?php _e('Day', 'to-twitter'); ?></th><th><?php _e('Time', 'to-twitter'); ?></th><th><?php _e('Filter', 'to-twitter'); ?></th><th><?php _e('Category', 'to-twitter'); ?></th><th><?php _e('Enable', 'to-twitter'); ?></th></tr>
+				<tr><th><?php _e('Day', 'to-twitter'); ?></th><th><?php _e('Time', 'to-twitter'); ?></th><th><?php _e('Filter', 'to-twitter'); ?></th><th><?php _e('Category', 'to-twitter'); ?></th><th>&nbsp;</th><th><?php _e('Tag', 'to-twitter'); ?></th><th><?php _e('Enable', 'to-twitter'); ?></th></tr>
 				<?php
 				
 				$days = array(
@@ -323,6 +323,12 @@
 					// category
 					echo '<td>';
 						echo	'<select name="scheduled-post['.$dayloop.'][category]">';
+							if ($options['scheduled-post'][$dayloop]['category'] == 'all'){
+								$selected = 'selected';
+							}else{
+								$selected = '';
+							}
+							echo	'<option value="all" '.$selected.' >(All)</option>';
 							$categories = get_categories(
 															array(
 																'orderby' => 'name',
@@ -337,6 +343,35 @@
 									$selected = '';
 								}
 								echo	'<option value="'.$category->term_id.'" '.$selected.' >'.$category->name.'</option>';
+							}
+						echo	'</select>';
+					echo '</td>';
+					// tag
+					echo '<td>';
+					echo 'and';
+					echo '</td>';
+					echo '<td>';
+						echo	'<select name="scheduled-post['.$dayloop.'][tag]">';
+							if ($options['scheduled-post'][$dayloop]['tag'] == 'all'){
+								$selected = 'selected';
+							}else{
+								$selected = '';
+							}
+							echo	'<option value="all" '.$selected.' >(All)</option>';
+							$tags = get_tags(
+													array(
+														'orderby' => 'name',
+														'hide_empty' => false,
+													)
+												);
+							
+							foreach ($tags as $tag) {
+								if ($options['scheduled-post'][$dayloop]['tag'] == $tag->term_id){
+									$selected = 'selected';
+								}else{
+									$selected = '';
+								}
+								echo	'<option value="'.$tag->term_id.'" '.$selected.' >'.$tag->name.'</option>';
 							}
 						echo	'</select>';
 					echo '</td>';

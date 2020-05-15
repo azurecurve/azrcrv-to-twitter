@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.7.3
+ * Version: 1.8.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -133,43 +133,50 @@ function azrcrv_tt_set_default_options($networkwide){
 													0 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													1 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													2 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													3 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													4 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													5 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 													6 => array(
 																'time' => '11:00',
 																'filter' => 'Is',
-																'category' => '',
+																'category' => 'all',
+																'tag' => 'all',
 																'enabled' => 0,
 															),
 												),
@@ -980,6 +987,7 @@ function azrcrv_tt_save_options(){
 				$newoptions[$dayloop]['time'] = sanitize_text_field($_POST[$option_name][$dayloop]['time']);
 				$newoptions[$dayloop]['filter'] = sanitize_text_field($_POST[$option_name][$dayloop]['filter']);
 				$newoptions[$dayloop]['category'] = sanitize_text_field($_POST[$option_name][$dayloop]['category']);
+				$newoptions[$dayloop]['tag'] = sanitize_text_field($_POST[$option_name][$dayloop]['tag']);
 				if (isset($_POST[$option_name][$dayloop]['enabled'])){
 					$newoptions[$dayloop]['enabled'] = 1;
 				}else{
@@ -1757,7 +1765,47 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 		$filter = '<>';
 	}
 	
+	$taxonomy_string = '';
+	$category_join_string = '';
+	$tag_join_string = '';
 	$category = $options['scheduled-post'][$day]['category'];
+	if ($category <> 'all'){
+		$category_join_string = '
+								INNER JOIN
+									'.$wpdb->prefix.'term_relationships AS trc
+										ON
+											trc.object_id = p.ID
+								INNER JOIN
+									'.$wpdb->prefix.'term_taxonomy AS ttc
+										ON
+											ttc.term_taxonomy_id = trc.term_taxonomy_id
+										AND
+											ttc.taxonomy = \'category\'
+								';
+		$taxonomy_filter_string = 
+									'
+									AND ttc.term_id '.$filter.' \''.$category.'\'
+									';
+	}
+	$tag = $options['scheduled-post'][$day]['tag'];
+	if ($tag <> 'all'){
+		$tag_join_string = '
+							INNER JOIN
+								'.$wpdb->prefix.'term_relationships AS trt
+									ON
+										trt.object_id = p.ID
+							INNER JOIN
+								'.$wpdb->prefix.'term_taxonomy AS ttt
+									ON
+										ttt.term_taxonomy_id = trt.term_taxonomy_id
+									AND
+										ttt.taxonomy = \'post_tag\'
+							';
+		$taxonomy_filter_string .= 
+									'
+									AND ttt.term_id '.$filter.' \''.$tag.'\'
+									';
+	}
 	
 	$tags = array();
 	foreach ($options['excluded-tags'] AS $tag => $exclude){
@@ -1801,26 +1849,13 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 				p.ID
 			FROM
 				'.$wpdb->prefix.'posts AS p
-			INNER JOIN
-				'.$wpdb->prefix.'term_relationships AS tr
-					ON
-						tr.object_id = p.ID
-			INNER JOIN
-				'.$wpdb->prefix.'term_taxonomy AS tt
-					ON
-						tt.term_taxonomy_id = tr.term_taxonomy_id
-					AND
-						tt.taxonomy = \'category\'
-			INNER JOIN
-				'.$wpdb->prefix.'terms AS t
-					ON
-						t.term_id = tt.term_id
+			'.$category_join_string.'
+			'.$tag_join_string.'
 			WHERE
 				p.post_status = \'publish\'
 			AND
 				p.post_type = \'post\'
-			AND
-				t.term_id '.$filter.' \''.$category.'\'
+				'.$taxonomy_filter_string.'
 				'.$tag_string.'
 			AND
 				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY) 
