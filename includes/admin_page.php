@@ -81,6 +81,22 @@
 				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php _e('Autopost new posts?', 'to-twitter'); ?></label></p>
 				
 				<?php
+					if (isset($options['default-post-tweet-format'])){
+						$default_post_tweet_format = $options['default-post-tweet-format'];
+					}else{
+						$default_post_tweet_format = '%t %u %h';
+					}
+				?>
+				<p><span class="description"><?php _e('Default post tweet format','to-twitter') ?>:</span><br/>
+				<input type="text" name="default-post-tweet-format" class="regular-text" value="<?php echo $default_post_tweet_format; ?>"><br />
+				<span class="description"><?php _e('The following placeholders can be used:
+				<ul>
+				<li><strong>%t</strong> - post title</li>
+				<li><strong>%u</strong> - permalink or Short URL (%s will also work)</li>
+				<li><strong>%h</strong> - hashtags</li>
+				</ul>','to-twitter'); ?></span></p>
+				
+				<?php
 					if (isset($options['default-autopost-after-delay'])){
 						$default_autopost_after_delay = $options['default-autopost-after-delay'];
 					}else{
@@ -136,6 +152,22 @@
 				<h4><?php _e('Page Settings', 'to-twitter'); ?></h4>
 				
 				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php _e('Autopost new pages?', 'to-twitter'); ?></label></p>
+				
+				<?php
+					if (isset($options['default-page-tweet-format'])){
+						$default_page_tweet_format = $options['default-page-tweet-format'];
+					}else{
+						$default_page_tweet_format = '%t %u %h';
+					}
+				?>
+				<p><span class="description"><?php _e('Default page tweet format','to-twitter') ?>:</span><br/>
+				<input type="text" name="default-page-tweet-format" class="regular-text" value="<?php echo $default_page_tweet_format; ?>"><br />
+				<span class="description"><?php _e('The following placeholders can be used:
+				<ul>
+				<li><strong>%t</strong> - page title</li>
+				<li><strong>%u</strong> - permalink or Short URL</li>
+				<li><strong>%h</strong> - hashtags</li>
+				</ul>','to-twitter'); ?></span></p>
 				
 				<?php
 					if (isset($options['default-autopost-page-after-delay'])){

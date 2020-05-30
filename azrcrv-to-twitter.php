@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.8.0
+ * Version: 1.9.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -114,6 +114,8 @@ function azrcrv_tt_set_default_options($networkwide){
 						'access_secret' => '',
 						'access_token' => '',
 						'access_token_secret' => '',
+						'default_post_tweet_prefix' => '',
+						'default_page_tweet_prefix' => '',
 						'default_autopost' => 0,
 						'default-autopost-after-delay' => 0,
 						'default-autopost-delay-prefix' => 'ICYMI:',
@@ -595,16 +597,21 @@ function azrcrv_tt_render_tweet_metabox() {
 				<table style="width: 100%; border-collapse: collapse;">
 					<tr>
 						<td style="width: 100%;">
-							<input
-								type="text"
-								name="post_tweet"
-								id="post_tweet"
-								class="large-text"
-								value="<?php echo esc_attr( $post_tweet ); ?>"
-							><br />
-							<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%s</strong>'); ?><br />
-							<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
-							
+							<p>
+								<input
+									type="text"
+									name="post_tweet"
+									id="post_tweet"
+									class="large-text"
+									value="<?php echo esc_attr( $post_tweet ); ?>"
+								>
+							</p>
+							<p>
+								<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%u</strong>'); ?>
+							</p>
+							<p>	
+								<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
+							</p>
 							<p>
 							<?php
 							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
@@ -675,15 +682,25 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 		}
 		$additional_hashtags_string = implode(' ', $additional_hashtags);
 				
-		$url = '%s';
+		$url = '%u';
+		
+		//$post_tweet = $tweet.' '.$url.' '.$additional_hashtags_string; //text for your tweet.
+		if ($post_type == 'post'){
+			$post_tweet = $options['default-post-tweet-format'];
+		}else{
+			$post_tweet = $options['default-page-tweet-format'];
+		}
+		if ($post_tweet = ''){
+			$post_tweet = '%t %u %h';
+		}
+		$post_tweet = str_replace('%t', $tweet, $post_tweet);
+		$post_tweet = str_replace('%h', $additional_hashtags_string, $post_tweet);
 		
 		if ($options['prefix_tweets_with_dot'] == 1){
-			if (substr($tweet, 0, 1) == '@'){
-				$tweet = '.'.$tweet;
+			if (substr($post_tweet, 0, 1) == '@'){
+				$post_tweet = '.'.$post_tweet;
 			}
 		}
-		
-		$post_tweet = $tweet.' '.$url.' '.$additional_hashtags_string; //text for your tweet.
 	}else{
 		/**
 		 * Sanitize the submitted data
@@ -731,7 +748,8 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 				}else{
 					$url = get_permalink($post_id);
 				}
-				$post_tweet = sprintf($post_tweet, $url);
+				$post_tweet = str_replace('%s', $url, $post_tweet);
+				$post_tweet = str_replace('%u', $url, $post_tweet);
 				
 				$tweet_post_status = azrcrv_tt_post_tweet($post_tweet);
 				
@@ -903,6 +921,8 @@ function azrcrv_tt_save_options(){
 		}else{
 			$options[$option_name] = 0;
 		}
+		$option_name = 'default-post-tweet-format';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		$option_name = 'default-autopost-after-delay';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
@@ -922,6 +942,8 @@ function azrcrv_tt_save_options(){
 		}else{
 			$options[$option_name] = 0;
 		}
+		$option_name = 'default-page-tweet-format';
+		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
 		$option_name = 'default-autopost-page-after-delay';
 		if (isset($_POST[$option_name])){
 			$options[$option_name] = 1;
@@ -1702,8 +1724,16 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 		}
 		
 		$tweet = $tweet.' '.$url.$additional_hashtags_string;
+		$post_tweet = $options['default-post-tweet-format'];
+		if ($post_tweet = ''){
+			$post_tweet = '%t %u %h';
+		}
+		$post_tweet = str_replace('%t', $tweet, $post_tweet);
+		$post_tweet = str_replace('%h', $additional_hashtags_string, $post_tweet);
+		$post_tweet = str_replace('%u', $url, $post_tweet);
+		$post_tweet = str_replace('%s', $url, $post_tweet);
 	}else{
-		$tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
+		$post_tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
 	}
 	
 	if(metadata_exists('post',$post_id,'_azrcrv_tt_scheduled_post_times_tweeted')){
@@ -1725,9 +1755,9 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 		$suffix = ' ['.$times_retweeted.']';
 	}
 	
-	$tweet = $prefix.$tweet.$suffix; //text for your tweet.
+	$post_tweet = $prefix.$post_tweet.$suffix; //text for your tweet.
 	
-	$tweet_post_status = azrcrv_tt_post_tweet($tweet);
+	$tweet_post_status = azrcrv_tt_post_tweet($post_tweet);
 	
 	if ($tweet_post_status == 200){
 		update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
@@ -1737,11 +1767,11 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 			if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
 
 				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-				$tweet_history[$dateTime] = $tweet;
+				$tweet_history[$dateTime] = $post_tweet;
 				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 
 			} else {
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $tweet));   
+				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
 			}
 		}
 	}
@@ -2167,9 +2197,17 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 		}else{
 			$url = get_permalink($post_id);
 		}
-		$tweet = $tweet.' '.$url.' '.$additional_hashtags_string;
+		//$tweet = $tweet.' '.$url.' '.$additional_hashtags_string;
+		$post_tweet = $options['default-page-tweet-format'];
+		if ($post_tweet = ''){
+			$post_tweet = '%t %u %h';
+		}
+		$post_tweet = str_replace('%t', $tweet, $post_tweet);
+		$post_tweet = str_replace('%h', $additional_hashtags_string, $post_tweet);
+		$post_tweet = str_replace('%u', $url, $post_tweet);
+		$post_tweet = str_replace('%s', $url, $post_tweet);
 	}else{
-		$tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
+		$post_tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true);
 	}
 	
 	if(metadata_exists('post',$post_id,'_azrcrv_tt_scheduled_page_times_tweeted')){
@@ -2191,9 +2229,9 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 		$suffix = ' ['.$times_retweeted.']';
 	}
 	
-	$tweet = $prefix.$tweet.$suffix; //text for your tweet.
+	$post_tweet = $prefix.$post_tweet.$suffix; //text for your tweet.
 	
-	$tweet_page_status = azrcrv_tt_post_tweet($tweet);
+	$tweet_page_status = azrcrv_tt_post_tweet($post_tweet);
 	
 	//if ($tweet_page_status == 200){
 		update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
@@ -2204,11 +2242,11 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 			if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
 
 				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-				$tweet_history[$dateTime] = $tweet;
+				$tweet_history[$dateTime] = $post_tweet;
 				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 
 			} else {
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $tweet));   
+				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
 			}
 		}
 	//}
