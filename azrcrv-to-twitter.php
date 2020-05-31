@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.10.0
+ * Version: 1.10.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -701,7 +701,7 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 		}else{
 			$post_tweet = $options['default-page-tweet-format'];
 		}
-		if (!isset($post_tweet)||$post_tweet = ''){
+		if (!isset($post_tweet)||$post_tweet == ''){
 			$post_tweet = '%t %u %h';
 		}
 		$post_tweet = str_replace('%t', $tweet, $post_tweet);
@@ -1753,7 +1753,7 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 		
 		$tweet = $tweet.' '.$url.$additional_hashtags_string;
 		$post_tweet = $options['default-post-tweet-format'];
-		if (!isset($post_tweet)||$post_tweet = ''){
+		if (!isset($post_tweet)||$post_tweet == ''){
 			$post_tweet = '%t %u %h';
 		}
 		$post_tweet = str_replace('%t', $tweet, $post_tweet);
@@ -2227,7 +2227,7 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 		}
 		//$tweet = $tweet.' '.$url.' '.$additional_hashtags_string;
 		$post_tweet = $options['default-page-tweet-format'];
-		if (!isset($post_tweet)||$post_tweet = ''){
+		if (!isset($post_tweet)||$post_tweet == ''){
 			$post_tweet = '%t %u %h';
 		}
 		$post_tweet = str_replace('%t', $tweet, $post_tweet);
