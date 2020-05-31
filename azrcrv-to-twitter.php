@@ -378,6 +378,17 @@ function azrcrv_tt_create_admin_menu(){
 				,'azrcrv-tt-st'
 				,'azrcrv_tt_display_schedule_tweet');
 	
+	$options = get_option('azrcrv-tt');
+	if ($options['record_tweet_history'] == 1){
+		add_submenu_page(
+					'azrcrv-tt'
+					,__('Tweet History', 'to-twitter')
+					,__('Tweet History', 'to-twitter')
+					,'manage_options'
+					,'azrcrv-tt-th'
+					,'azrcrv_tt_display_tweet_history');
+	}
+	
 	add_submenu_page("azrcrv-plugin-menu"
 						,__("To Twitter", "to-twitter")
 						,__("To Twitter", "to-twitter")
@@ -1251,6 +1262,23 @@ function azrcrv_tt_display_schedule_tweet(){
 	$azrcrv_tt = get_option('azrcrv-tt');
 
     require_once('includes/schedule_tweet_page.php');
+}
+
+/*
+ * Display tweet history page
+ *
+ * @since 1.10.0
+ *
+ */
+function azrcrv_tt_display_tweet_history(){
+
+	if (!current_user_can('manage_options')) {
+		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+	}
+	
+	$options = get_option('azrcrv-tt');
+	
+	require_once('includes/tweet_history_page.php');
 }
 
 /*
