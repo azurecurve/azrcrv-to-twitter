@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.10.1
+ * Version: 1.10.2
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -1903,10 +1903,30 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 	
 	$before = $options['newest-post-age'];
 	
+	$times_tweeted = '';
+	$times_tweeted_where = '';
+	/*if (isset($options['scHeduled-page-include-max-times-tweeted']){ 
+		$times_tweeted_join = 'LEFT JOIN
+							'.$wpdb->prefix.'postmeta AS pmtt
+								ON
+									pmtt.post_id = p.ID
+								AND
+									pmtt.meta_key = \'_azrcrv_tt_scheduled_page_times_tweeted\'';
+		$times_tweeted_where = 'AND
+									(IFNULL(pmtt.meta_value, 0) <= \''.$options['scHeduled-page-include-max-times-tweeted'].'\'';
+	}*/
+	
 	$sql = 'SELECT
 				p.ID
 			FROM
 				'.$wpdb->prefix.'posts AS p
+			LEFT JOIN
+				'.$wpdb->prefix.'postmeta AS pm
+					ON
+						pm.post_id = p.ID
+					AND
+						pm.meta_key = \'_azrcrv_tt_exclude_schedule\'
+			'.$times_tweeted_join.'
 			'.$category_join_string.'
 			'.$tag_join_string.'
 			WHERE
@@ -1916,7 +1936,10 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 				'.$taxonomy_filter_string.'
 				'.$tag_string.'
 			AND
-				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY) 
+				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY)
+			AND
+				(pm.meta_key = \'0\' OR pm.meta_key IS NULL)
+			'.$times_tweeted_where.'
 			ORDER BY
 				RAND()
 			LIMIT
@@ -2298,6 +2321,19 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 		$filter = 'NOT LIKE';
 	}
 	
+	$times_tweeted = '';
+	$times_tweeted_where = '';
+	/*if (isset($options['scHeduled-page-include-max-times-tweeted']){
+		$times_tweeted_join = 'LEFT JOIN
+							'.$wpdb->prefix.'postmeta AS pmtt
+								ON
+									pmtt.post_id = p.ID
+								AND
+									pmtt.meta_key = \'_azrcrv_tt_scheduled_page_times_tweeted\'';
+		$times_tweeted_where = 'AND
+									(IFNULL(pmtt.meta_value, 0) <= \''.$options['scHeduled-page-include-max-times-tweeted'].'\'';
+	}*/
+	
 	$before = $options['newest-page-age'];
 	
 	$sql = 'SELECT
@@ -2307,7 +2343,10 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 			LEFT JOIN
 				'.$wpdb->prefix.'postmeta AS pm
 					ON
+						pm.post_id = p.ID
+					AND
 						pm.meta_key = \'_azrcrv_tt_exclude_schedule\'
+			'.$times_tweeted_join.'
 			WHERE
 				p.post_status = \'publish\'
 			AND
@@ -2315,9 +2354,10 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 			AND
 				p.post_content '.$filter.' \'%'.$options['scheduled-page'][$day]['textcontains'].'%\'
 			AND
-				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY) 
+				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY)
 			AND
-				(pm.meta_key <> 1 OR pm.meta_key IS NULL)
+				(pm.meta_key = \'0\' OR pm.meta_key IS NULL)
+			'.$times_tweeted_where.'
 			ORDER BY
 				RAND()
 			LIMIT
