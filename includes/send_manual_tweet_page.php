@@ -22,7 +22,7 @@
 
         <div>
 			<p class="azrcrv_tt_horiz">
-				<textarea name="azrcrv_tt_tweet" rows="5" id="azrcrv_tt_tweet" class="large-text code" maxlength="240" onkeyup="countChar(this)" placeholder="<?php _e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
+				<textarea name="tweet" rows="5" id="tweet" class="large-text code" maxlength="240" onkeyup="countChar(this)" placeholder="<?php _e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
 				<div id="the-count" style='float: right;' >
 					<span id="current_counter">0</span><span id="maximum">/240</span>
 				</div>

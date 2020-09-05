@@ -441,19 +441,31 @@
 					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Select posts at least this many days old','to-twitter') ?>:</span><br/>
-					<select name="newest-post-age">
+					<p><span class="description"><?php _e('Include posts which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
 						<?php
-							for ($ageloop = 0; $ageloop <= 365; $ageloop++){
-								if ($options['newest-post-age'] == $ageloop){
-									$selected = 'selected';
-								}else{
-									$selected = '';
-								}
-								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+							if (isset($options['scheduled-post-include-max-times-tweeted'])){
+								$includemaxtimes = $options['scheduled-post-include-max-times-tweeted'];
+							}else{
+								$includemaxtimes = 100;
 							}
 						?>
-					</select>
+						<input name="scheduled-post-include-max-times-tweeted" type="number" step="1" min="0" id="scheduled-post-include-max-times-tweeted" value="<?php echo $includemaxtimes; ?>" class=	"small-text" />
+					</p>
+				</p>
+				<p>
+					<p><span class="description"><?php _e('Select posts at least this many days old','to-twitter') ?>:</span><br/>
+						<select name="newest-post-age">
+							<?php
+								for ($ageloop = 0; $ageloop <= 365; $ageloop++){
+									if ($options['newest-post-age'] == $ageloop){
+										$selected = 'selected';
+									}else{
+										$selected = '';
+									}
+									echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+								}
+							?>
+						</select>
 					</p>
 				</p>
 				
@@ -573,19 +585,32 @@
 					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Select pages at least this many days old','to-twitter') ?>:</span><br/>
-					<select name="newest-page-age">
+					<p><span class="description"><?php _e('Include pages which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
 						<?php
-							for ($ageloop = 0; $ageloop <= 365; $ageloop++){
-								if ($options['newest-page-age'] == $ageloop){
-									$selected = 'selected';
-								}else{
-									$selected = '';
-								}
-								echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+							if (isset($options['scheduled-page-include-max-times-tweeted'])){
+								$includemaxtimes = $options['scheduled-page-include-max-times-tweeted'];
+							}else{
+								$includemaxtimes = 100;
 							}
 						?>
-					</select>
+						<input name="scheduled-page-include-max-times-tweeted" type="number" step="1" min="0" id="scheduled-page-include-max-times-tweeted" value="<?php echo $includemaxtimes; ?>" class=	"small-text" />
+					</p>
+				</p>
+				<p>
+					<p><span class="description"><?php _e('Select pages at least this many days old','to-twitter') ?>:</span><br/>
+						<select name="newest-page-age">
+							<?php
+								for ($ageloop = 0; $ageloop <= 100; $ageloop++){
+									if ($options['newest-page-age'] == $ageloop){
+										$selected = 'selected';
+									}else{
+										$selected = '';
+									}
+									echo '<option value="'.$ageloop.'" '.$selected.' >'.$ageloop.'</option>';
+								}
+							?>
+						</select>
+					</p>
 				</p>
 			</p>
 		</div>

@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.10.3
+ * Version: 1.11.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -185,6 +185,7 @@ function azrcrv_tt_set_default_options($networkwide){
 						'scheduled-tweet-generate' => 0,
 						'scheduled-tweet-prefix' => 'ICYMI:',
 						'scheduled-tweet-suffix' => 0,
+						'scheduled-page-include-max-times-tweeted' => 100,
 						'newest-post-age' => 181,
 						'excluded-tags' => array(),
 						'scheduled-page' => array(
@@ -234,6 +235,7 @@ function azrcrv_tt_set_default_options($networkwide){
 						'scheduled-page-tweet-generate' => 0,
 						'scheduled-page-tweet-prefix' => 'ICYMI:',
 						'scheduled-page-tweet-suffix' => 0,
+						'scheduled-page-include-max-times-tweeted' => 100,
 						'newest-page-age' => 0,
 						'updated' => strtotime('2020-04-04'),
 					);
@@ -1060,7 +1062,13 @@ function azrcrv_tt_save_options(){
 		* Scheduled tweet must be at leat this old
 		*/
 		$option_name = 'newest-post-age';
-		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
+		
+		/*
+		* Maximum number of times a post has been tweeted on schedule to be included
+		*/
+		$option_name = 'scheduled-post-include-max-times-tweeted';
+		$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
 		
 		/*
 		* Update excluded tags
@@ -1114,7 +1122,7 @@ function azrcrv_tt_save_options(){
 		}
 		
 		/*
-		* Prefix for scheduled-page tweets
+		* Generate new tweet for scheduled page tweets
 		*/
 		$option_name = 'scheduled-page-tweet-generate';
 		if (isset($_POST[$option_name])){
@@ -1127,7 +1135,13 @@ function azrcrv_tt_save_options(){
 		* scheduled-page page must be at leat this old
 		*/
 		$option_name = 'newest-page-age';
-		$options[$option_name] = sanitize_text_field($_POST[$option_name]);
+		$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
+		
+		/*
+		* Maximum number of times a page has been tweeted on schedule to be included
+		*/
+		$option_name = 'scheduled-page-include-max-times-tweeted';
+		$options[$option_name] = sanitize_text_field(intval($_POST[$option_name]));
 		
 		/*
 		* Update options
@@ -1232,7 +1246,7 @@ function azrcrv_tt_send_tweet(){
 		
 		$tweet_post_status = 'tweet-failed';
 		if (isset($_POST['tweet'])){ // AND $token_error != true) {
-			$status = azrcrv_tt_post_tweet($_POST['azrcrv_tt_tweet']);
+			$status = azrcrv_tt_post_tweet($_POST['tweet']);
 			
 			if ($status == 200) {
 				$tweet_post_status = 'tweet-sent='.$status;
@@ -1905,7 +1919,7 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 	
 	$times_tweeted = '';
 	$times_tweeted_where = '';
-	/*if (isset($options['scHeduled-page-include-max-times-tweeted']){ 
+	if (isset($options['scheduled-post-include-max-times-tweeted'])){ 
 		$times_tweeted_join = 'LEFT JOIN
 							'.$wpdb->prefix.'postmeta AS pmtt
 								ON
@@ -1913,8 +1927,8 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 								AND
 									pmtt.meta_key = \'_azrcrv_tt_scheduled_page_times_tweeted\'';
 		$times_tweeted_where = 'AND
-									(IFNULL(pmtt.meta_value, 0) <= \''.$options['scHeduled-page-include-max-times-tweeted'].'\'';
-	}*/
+									IFNULL(pmtt.meta_value, 0) <= '.$options['scheduled-post-include-max-times-tweeted'].'';
+	}
 	
 	$sql = 'SELECT
 				p.ID
@@ -1938,7 +1952,7 @@ function azrcrv_tt_select_scheduled_random_post_tweet($day){
 			AND
 				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY)
 			AND
-				(pm.meta_key = \'0\' OR pm.meta_key IS NULL)
+				(pm.meta_value = 0 OR pm.meta_key IS NULL)
 			'.$times_tweeted_where.'
 			ORDER BY
 				RAND()
@@ -2323,7 +2337,7 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 	
 	$times_tweeted = '';
 	$times_tweeted_where = '';
-	/*if (isset($options['scHeduled-page-include-max-times-tweeted']){
+	if (isset($options['scheduled-page-include-max-times-tweeted'])){
 		$times_tweeted_join = 'LEFT JOIN
 							'.$wpdb->prefix.'postmeta AS pmtt
 								ON
@@ -2331,8 +2345,8 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 								AND
 									pmtt.meta_key = \'_azrcrv_tt_scheduled_page_times_tweeted\'';
 		$times_tweeted_where = 'AND
-									(IFNULL(pmtt.meta_value, 0) <= \''.$options['scHeduled-page-include-max-times-tweeted'].'\'';
-	}*/
+									IFNULL(pmtt.meta_value, 0) <= '.$options['scheduled-page-include-max-times-tweeted'].'';
+	}
 	
 	$before = $options['newest-page-age'];
 	
@@ -2356,7 +2370,7 @@ function azrcrv_tt_select_scheduled_random_page_tweet($day){
 			AND
 				p.post_date <= DATE_ADD(\''.DATE('Y-m-d 23:59:59').'\', INTERVAL -'.$before.' DAY)
 			AND
-				(pm.meta_key = \'0\' OR pm.meta_key IS NULL)
+				(pm.meta_value = 0 OR pm.meta_key IS NULL)
 			'.$times_tweeted_where.'
 			ORDER BY
 				RAND()
