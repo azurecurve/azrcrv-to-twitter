@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
-Version:		1.11.0
+Version:		1.12.0
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.11.0/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.12.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -64,6 +64,12 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.12.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.12.0)
+ * Fix plugin action link to use admin_url() function.
+ * Rewrite option handling so defaults not stored in database on plugin initialisation.
+ * Add plugin icon and banner.
+ * Update azurecurve plugin menu.
 
 ### [Version 1.11.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.11.0)
  * Add options to limit number of times a post/page can be automatically tweeted on a schedule.
@@ -163,5 +169,5 @@ Some of the top plugins available from **azurecurve** are:
 * [Breadcrumbs](https://development.azurecurve.co.uk/classicpress-plugins/breadcrumbs/)
 * [Series Index](https://development.azurecurve.co.uk/classicpress-plugins/series-index/)
 * [To Twitter](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
-* [Theme Switches](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
+* [Theme Switcher](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
 * [Toggle Show/Hide](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/)

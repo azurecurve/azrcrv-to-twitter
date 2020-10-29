@@ -1,4 +1,4 @@
-<?php $azrcrv_tt = get_option('azrcrv-tt'); ?>
+<?php $azrcrv_tt = azrcrv_tt_get_option('azrcrv-tt'); ?>
 
 <div class="wrap arcrv-tt">
 	
