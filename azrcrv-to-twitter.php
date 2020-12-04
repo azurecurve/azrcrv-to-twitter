@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.12.0
+ * Version: 1.13.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -266,10 +266,31 @@ function azrcrv_tt_get_option($option_name){
 
 	$options = get_option($option_name, $defaults);
 
-	$options = wp_parse_args($options, $defaults);
+	$options = azrcrv_tt_recursive_parse_args($options, $defaults);
 
 	return $options;
 
+}
+
+/**
+ * Recursively parse options to merge with defaults.
+ *
+ * @since 1.13.0
+ *
+ */
+function azrcrv_tt_recursive_parse_args( $args, $defaults ) {
+	$new_args = (array) $defaults;
+
+	foreach ( $args as $key => $value ) {
+		if ( is_array( $value ) && isset( $new_args[ $key ] ) ) {
+			$new_args[ $key ] = azrcrv_e_recursive_parse_args( $value, $new_args[ $key ] );
+		}
+		else {
+			$new_args[ $key ] = $value;
+		}
+	}
+
+	return $new_args;
 }
 
 /**
