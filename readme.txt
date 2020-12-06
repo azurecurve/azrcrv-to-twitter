@@ -1,7 +1,7 @@
 === To Twitter ===
 
 Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
-Version:		1.13.0
+Version:		1.14.0
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
@@ -65,6 +65,10 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
+### [Version 1.14.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.14.0)
+ * Add image media upload to posts, pages, manual and scheduled tweets (up to four images supported).
+ * Fix bug with empty array when reloading post.
+ 
 ### [Version 1.13.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.13.0)
  * Add function to handle multilevel default options correctly.
  

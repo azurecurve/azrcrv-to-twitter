@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automatically tweets when posts published.
- * Version: 1.13.0
+ * Version: 1.14.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -83,6 +83,7 @@ add_action('azrcrv_tt_scheduled_page_tweet_thursday', 'azrcrv_tt_scheduled_page_
 add_action('azrcrv_tt_scheduled_page_tweet_friday', 'azrcrv_tt_scheduled_page_send_tweet_friday');
 add_action('azrcrv_tt_scheduled_page_tweet_saturday', 'azrcrv_tt_scheduled_page_send_tweet_saturday');
 add_action('azrcrv_tt_scheduled_page_tweet_sunday', 'azrcrv_tt_scheduled_page_send_tweet_sunday');
+add_action('admin_enqueue_scripts', 'azrcrv_tt_media_uploader');
 
 // add filters
 add_filter('plugin_action_links', 'azrcrv_tt_add_plugin_action_link', 10, 2);
@@ -124,6 +125,24 @@ function azrcrv_tt_custom_image_url($url){
         $url = plugin_dir_url(__FILE__).'assets/pluginimages';
     }
     return $url;
+}
+
+/**
+ * Load JQuery.
+ *
+ * @since 1.0.0
+ *
+ */
+function azrcrv_tt_media_uploader() {
+    global $post_type;
+        if(function_exists('wp_enqueue_media')) {
+            wp_enqueue_media();
+        }
+        else {
+            wp_enqueue_script('media-upload');
+            wp_enqueue_script('thickbox');
+            wp_enqueue_style('thickbox');
+        }
 }
 
 /**
@@ -275,7 +294,7 @@ function azrcrv_tt_get_option($option_name){
 /**
  * Recursively parse options to merge with defaults.
  *
- * @since 1.13.0
+ * @since 1.14.0
  *
  */
 function azrcrv_tt_recursive_parse_args( $args, $defaults ) {
@@ -471,10 +490,12 @@ function azrcrv_tt_get_hashtags($post_id){
 		$categories = wp_get_post_categories($post_id);
 		foreach($categories as $category){
 			$cat = get_category($category);
-			$items = explode(' ', $options['category-hashtags'][$cat->term_id]);
-			foreach($items as $item){
-				if (strlen($item) > 0 ){
-					$hashtags[] = $item;
+			if (isset($options['category-hashtags'][$cat->term_id])){
+				$items = explode(' ', $options['category-hashtags'][$cat->term_id]);
+				foreach($items as $item){
+					if (strlen($item) > 0 ){
+						$hashtags[] = $item;
+					}
 				}
 			}
 		}
@@ -482,10 +503,12 @@ function azrcrv_tt_get_hashtags($post_id){
 		$tags = wp_get_post_tags($post_id);
 		foreach($tags as $tag){
 			$t = get_tag($tag);
-			$items = explode(' ', $options['tag-hashtags'][$t->term_id]);
-			foreach($items as $item){
-				if (strlen($item) > 0 ){
-					$hashtags[] = $item;
+			if (isset($options['category-hashtags'][$t->term_id])){
+				$items = explode(' ', $options['tag-hashtags'][$t->term_id]);
+				foreach($items as $item){
+					if (strlen($item) > 0 ){
+						$hashtags[] = $item;
+					}
 				}
 			}
 		}
@@ -577,6 +600,7 @@ function azrcrv_tt_render_tweet_metabox() {
 	// Variables
 	global $post; // Get the current post data
 	$post_tweet = get_post_meta($post->ID, '_azrcrv_tt_post_tweet', true); // Get the saved values
+	$post_media = get_post_meta($post->ID, '_azrcrv_tt_post_tweet_media', true); // Get the saved values
 	?>
 
 		<fieldset>
@@ -598,6 +622,46 @@ function azrcrv_tt_render_tweet_metabox() {
 							</p>
 							<p>	
 								<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
+							</p>
+							<p>
+								<?php
+									$no_image = plugin_dir_url(__FILE__).'assets/images/no-image.svg';
+									$tweet_media = array();
+									for ($media_loop = 0; $media_loop <= 3; $media_loop++){
+										if (isset($post_media[$media_loop])){
+											$tweet_media[$media_loop] = array(
+																				'image' => $post_media[$media_loop],
+																				'value' => $post_media[$media_loop],
+																			);
+										}else{
+											$tweet_media[$media_loop] = array(
+																				'image' => $no_image,
+																				'value' => '',
+																			);
+										}
+									}
+								?>
+								
+								<p style="clear: both; " />
+								
+								<div style="width: 100%; display: block; ">
+									<div style="width: 100%; display: block; padding-bottom: 12px; ">
+										<?php esc_html_e('Select up to four images to include with tweet.', 'to-twitter'); ?>
+									</div>
+									<?php
+										foreach ($tweet_media AS $media_key => $media){
+											$key = $media_key + 1;
+											echo '<div style="float: left; width: 170px; text-align: center; ">';
+												echo '<img src="'.$media['image'].'" id="tweet-image-'.$key.'" style="width: 160px;"><br />';
+												echo '<input type="hidden" name="tweet-selected-image-'.$key.'" id="tweet-selected-image-'.$key.'" value="'.$media['value'].'" class="regular-text" />';
+												echo '<input type="button" id="azrcrv-tt-upload-image-'.$key.'" class="button upload" value="'.__('Upload', 'to-twitter').'" />&nbsp;';
+												echo '<input type="button" id="azrcrv-tt-remove-image-'.$key.'" class="button remove" value="'.__( 'Remove', 'to-twitter').'" />';
+											echo '</div>';
+										}
+									?>
+								</div>
+								
+								<p style="clear: both; padding-bottom: 6px; " />
 							</p>
 							<p>
 							<?php
@@ -668,10 +732,7 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 			}
 		}
 		$additional_hashtags_string = implode(' ', $additional_hashtags);
-				
-		$url = '%u';
 		
-		//$post_tweet = $tweet.' '.$url.' '.$additional_hashtags_string; //text for your tweet.
 		if ($post_type == 'post'){
 			$post_tweet = $options['default-post-tweet-format'];
 		}else{
@@ -694,8 +755,17 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 		 */
 		$post_tweet = sanitize_text_field( $_POST['post_tweet'] );
 	}
+	
+	$media = array();
+	for ($media_loop = 1; $media_loop <= 4; $media_loop++){
+		if(strlen($_POST['tweet-selected-image-'.$media_loop]) >= 1){
+			$media[] = $_POST['tweet-selected-image-'.$media_loop];
+		}
+	}
+	
 	// Save our submissions to the database
 	update_post_meta( $post->ID, '_azrcrv_tt_post_tweet', $post_tweet );
+	update_post_meta( $post->ID, '_azrcrv_tt_post_tweet_media', $media);
 
 }
 
@@ -727,6 +797,7 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 		if ($autopost == 1){
 			
 			$post_tweet = get_post_meta( $post_id, '_azrcrv_tt_post_tweet', true ); // get tweet content
+			$post_media = get_post_meta( $post_id, '_azrcrv_tt_post_tweet_media', true ); // get tweet content
 			
 			if (strlen($post_tweet) > 0){
 			
@@ -738,7 +809,12 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 				$post_tweet = str_replace('%s', $url, $post_tweet);
 				$post_tweet = str_replace('%u', $url, $post_tweet);
 				
-				$tweet_post_status = azrcrv_tt_post_tweet($post_tweet);
+				$parameters = array("status" => $post_tweet);
+				if (isset($post_media) AND is_array($post_media)){
+					$parameters['media-urls'] = $post_media;
+				}
+				
+				$tweet_post_status = azrcrv_tt_post_tweet($parameters);
 				
 				if ($tweet_post_status == 200) {
 					update_post_meta($post_id, '_azrcrv_tt_autopost', ''); // remove autpost tweet fag
@@ -823,7 +899,7 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
  * @since 1.0.0
  *
  */
-function azrcrv_tt_post_tweet($tweet){
+function azrcrv_tt_post_tweet($parameters){
 				
 	$options = azrcrv_tt_get_option('azrcrv-tt');
 	
@@ -834,7 +910,25 @@ function azrcrv_tt_post_tweet($tweet){
 	
 	$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET);
 	
-	$tweet_post_status = $connection->post("statuses/update", ["status" => $tweet]);
+	if (!is_array($parameters)){
+		$parameters = array('status' => $parameters,);
+	}else{
+		foreach ($parameters['media-urls'] AS $media_to_upload){
+			$media_upload = $connection->upload(
+													'media/upload'
+													,array(
+																'media' => realpath($_SERVER['DOCUMENT_ROOT'] . parse_url($media_to_upload, PHP_URL_PATH)),
+															)
+												);
+			$media[] = $media_upload->media_id_string;
+		}
+		
+		if (count($media) >= 1){
+			$parameters['media_ids'] = implode(',', $media);
+		}
+	}
+	
+	$tweet_post_status = $connection->post("statuses/update", $parameters);
 	
 	$tweet_post_status = $connection->getLastHttpCode();
 	
@@ -1219,8 +1313,22 @@ function azrcrv_tt_send_tweet(){
 		}
 		
 		$tweet_post_status = 'tweet-failed';
+		$media = array();
 		if (isset($_POST['tweet'])){ // AND $token_error != true) {
-			$status = azrcrv_tt_post_tweet($_POST['tweet']);
+			
+			$parameters = array("status" => $_POST['tweet']);
+			
+			$media = array();
+			for ($media_loop = 1; $media_loop <= 4; $media_loop++){
+				if(strlen($_POST['tweet-selected-image-'.$media_loop]) >= 1){
+					$media[] = $_POST['tweet-selected-image-'.$media_loop];
+				}
+			}
+			if (count($media) >= 1){
+				$parameters['media-urls'] = $media;
+			}
+			
+			$status = azrcrv_tt_post_tweet($parameters);
 			
 			if ($status == 200) {
 				$tweet_post_status = 'tweet-sent='.$status;
@@ -1306,6 +1414,18 @@ function azrcrv_tt_schedule_tweet(){
 			$scheduled_tweets[$schedule_id]['tweet'] = $_POST['tweet'];
 			$scheduled_tweets[$schedule_id]['date'] = $_POST[$option_name]['date'];
 			$scheduled_tweets[$schedule_id]['time'] = $_POST[$option_name]['time'];
+			
+			$media = array();
+			for ($media_loop = 1; $media_loop <= 4; $media_loop++){
+				if(strlen($_POST['tweet-selected-image-'.$media_loop]) >= 1){
+					$media[] = $_POST['tweet-selected-image-'.$media_loop];
+				}
+			}
+			
+			if (count($media) >= 1){
+				$scheduled_tweets[$schedule_id]['media-urls'] = $media;
+			}
+			
 			wp_schedule_single_event(strtotime(
 											$_POST[$option_name]['date'].' '.
 											date($_POST[$option_name]['time'])
@@ -1372,7 +1492,12 @@ function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
 	
 	if (isset($scheduled_tweets[$schedule_id]['tweet'])){ // AND $token_error != true) {
 		
-		$status = azrcrv_tt_post_tweet($scheduled_tweets[$schedule_id][tweet]);
+		$parameters = array('status' => $scheduled_tweets[$schedule_id][tweet],);
+		if (isset($scheduled_tweets[$schedule_id]['media-urls'])){
+			$parameters['media-urls'] = $scheduled_tweets[$schedule_id]['media-urls'];
+		}
+		
+		$status = azrcrv_tt_post_tweet($parameters);
 		
 		$schedule = explode('-', $schedule_id);
 		$post_id = $schedule[0];

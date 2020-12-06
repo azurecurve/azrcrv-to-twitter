@@ -37,7 +37,23 @@
 						<p>
 							<input type="date" id="scheduled-tweet[date]" name="scheduled-tweet[date]" value="<?php echo date("Y-m-d"); ?>" min="<?php echo date("Y-m-d"); ?>">&nbsp;<input type="time" id="scheduled-tweet[time]" name="scheduled-tweet[time]" value="<?php echo date("H:i"); ?>" required>
 						</p>
-						<input type="submit" style="margin:3px;" value="<?php _e('Schedule Tweet', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit"/>
+						<?php
+							$no_image = plugin_dir_url(__FILE__).'../assets/images/no-image.svg';
+							$tweet_media = array();
+							for ($media_loop = 1; $media_loop <= 4; $media_loop++){
+								$tweet_image[$media_loop] = $no_image;
+								echo '<div style="float: left; width: 170px; text-align: center; ">';
+									echo '<img src="'.$tweet_image[$media_loop].'" id="tweet-image-'.$media_loop.'" style="width: 160px;"><br />';
+									echo '<input type="hidden" name="tweet-selected-image-'.$media_loop.'" id="tweet-selected-image-'.$media_loop.'" value="" class="regular-text" />';
+									echo '<input type="button" id="azrcrv-tt-upload-image-'.$media_loop.'" class="button upload" value="'.__('Upload', 'to-twitter').'" />&nbsp;';
+									echo '<input type="button" id="azrcrv-tt-remove-image-'.$media_loop.'" class="button remove" value="'.__( 'Remove', 'to-twitter').'" />';
+								echo '</div>';
+							}
+						?>
+						<p style="clear: both; " />
+						<div style="width: 100%x; display: block; padding-top: 12px; ">
+							<input type="submit" style="margin:3px;" value="<?php _e('Schedule Tweet', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit"/>
+						</div>
 					</p>
 				</form>
 			</div>
