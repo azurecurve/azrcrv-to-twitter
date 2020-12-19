@@ -2,8 +2,8 @@
 /** 
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
- * Description: Automatically tweets when posts published.
- * Version: 1.14.1
+ * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
+ * Version: 1.15.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -302,7 +302,7 @@ function azrcrv_tt_recursive_parse_args( $args, $defaults ) {
 
 	foreach ( $args as $key => $value ) {
 		if ( is_array( $value ) && isset( $new_args[ $key ] ) ) {
-			$new_args[ $key ] = azrcrv_e_recursive_parse_args( $value, $new_args[ $key ] );
+			$new_args[ $key ] = azrcrv_tt_recursive_parse_args( $value, $new_args[ $key ] );
 		}
 		else {
 			$new_args[ $key ] = $value;
@@ -668,7 +668,17 @@ function azrcrv_tt_render_tweet_metabox() {
 							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
 								echo '<strong>'.__('Previous Tweets', 'to-twitter').'</strong><br />';
 								foreach(array_reverse(get_post_meta($post->ID, '_azrcrv_tt_tweet_history', true )) as $key => $tweet){
-									echo '•&nbsp;'.$key.' - <em>'.$tweet.'</em><br />';
+									if (is_array($tweet)){ $tweet_detail = $tweet['tweet']; }else{ $tweet_detail = $tweet; }
+									
+									if (isset($tweet['key'])){ $tweet_date = $tweet['key']; }else{ $tweet_date = strtotime($key); }
+									$tweet_date = date('d/m/Y H:i', $tweet_date);
+									
+									if (isset($tweet['author']) AND strlen($tweet['author']) > 0){
+										$tweet_link = '<a href="https://twitter.com/'.$tweet['author'].'/status/'.$tweet['tweet_id'].'" style="text-decoration: none; "><span class="dashicons dashicons-twitter"></span></a>&nbsp';
+									}else{
+										$tweet_link = '';
+									}
+									echo '•&nbsp;'.$tweet_date.' - <em>'.$tweet_link.$tweet_detail.'</em><br />';
 								}	
 							}
 							?>
@@ -814,27 +824,28 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 					$parameters['media-urls'] = $post_media;
 				}
 				
-				$tweet_post_status = azrcrv_tt_post_tweet($parameters);
+				$tweet_result = azrcrv_tt_post_tweet($parameters);
 				
-				if ($tweet_post_status == 200) {
+				$options = azrcrv_tt_get_option('azrcrv-tt');
+				
+				if ($options['record_tweet_history'] == 1){
+					$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+					if (!is_array($tweet_history)){ $tweet_history = array(); }
+					$tweet_history[] = array(
+														'key' => time(),
+														'date' => date("Y-m-d"),
+														'time' => date("H:i"),
+														'tweet_id' => $tweet_result['id'],
+														'author' => $tweet_result['screen_name'],
+														'tweet' => $post_tweet,
+													);
+					update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+				}
+				
+				if ($tweet_result['status'] == 200) {
 					update_post_meta($post_id, '_azrcrv_tt_autopost', ''); // remove autpost tweet fag
 					update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
 					update_post_meta( $post_id, '_azrcrv_tt_post_tweet', $post_tweet );
-					
-					$options = azrcrv_tt_get_option('azrcrv-tt');
-					
-					if ($options['record_tweet_history'] == 1){
-						$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
-						if (metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
-
-							$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-							$tweet_history[$dateTime] = $post_tweet;
-							update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
-
-						} else {
-							update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
-						}
-					}
 					
 					/* send icymi */
 					$autopost_after_delay = get_post_meta($post_id, '_azrcrv_tt_autopost_after_delay', true);
@@ -912,7 +923,7 @@ function azrcrv_tt_post_tweet($parameters){
 	
 	if (!is_array($parameters)){
 		$parameters = array('status' => $parameters,);
-	}else{
+	}elseif (isset($parameters['media-urls'])){
 		foreach ($parameters['media-urls'] AS $media_to_upload){
 			$media_upload = $connection->upload(
 													'media/upload'
@@ -928,11 +939,13 @@ function azrcrv_tt_post_tweet($parameters){
 		}
 	}
 	
-	$tweet_post_status = $connection->post("statuses/update", $parameters);
+	$tweet_result = $connection->post("statuses/update", $parameters);
+	$tweet_result = (array) $tweet_result;
+	$user = (array) $tweet_result['user'];
+	$tweet_result['screen_name'] = $user['screen_name'];
+	$tweet_result['status'] = $connection->getLastHttpCode();
 	
-	$tweet_post_status = $connection->getLastHttpCode();
-	
-	return $tweet_post_status;
+	return $tweet_result;
 }
 
 /*
@@ -1285,7 +1298,7 @@ function azrcrv_tt_display_send_manual_tweet(){
 
 
 /*
- * Send tweet
+ * Send manual tweet
  *
  * @since 1.0.0
  *
@@ -1328,17 +1341,39 @@ function azrcrv_tt_send_tweet(){
 				$parameters['media-urls'] = $media;
 			}
 			
-			$status = azrcrv_tt_post_tweet($parameters);
+			if ($_POST['reply-to'] != ''){
+				$parameters['in_reply_to_status_id'] = $_POST['reply-to'];
+			}
 			
-			if ($status == 200) {
-				$tweet_post_status = 'tweet-sent='.$status;
+			$tweet_result = azrcrv_tt_post_tweet($parameters);
+			
+			if ($tweet_result['status'] == 200) {
+				$tweet_post_status = 'tweet-sent='.$tweet_result['status'];
+				if (isset($_POST['thread'])){
+					$reply_to = '&reply-to='.$tweet_result['id'];
+				}
 			}else{
-				$tweet_post_status .= '='.$status;
+				$tweet_post_status .= '='.$tweet_result['status'];
+			}
+			
+			if ($azrcrv_tt['record_tweet_history'] == 1){
+				$manual_tweet_history = get_option('azrcrv-tt-manual-tweet-history');
+				$manual_tweet = array();
+				$manual_tweet['key'] = time();
+				$manual_tweet['tweet_id'] = $tweet_result['id'];
+				$manual_tweet['author'] = $tweet_result['screen_name'];
+				$manual_tweet['tweet'] = $_POST['tweet'];
+				$manual_tweet['date'] = date("Y-m-d");
+				$manual_tweet['time'] = date("H:i");
+				$manual_tweet['status'] = $tweet_result['status'];
+				
+				$manual_tweet_history[] = $manual_tweet;
+				update_option('azrcrv-tt-manual-tweet-history', $manual_tweet_history);
 			}
 		}
 		
 		// Redirect the page to the configuration form that was processed
-		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-smt&'.$tweet_post_status, admin_url('admin.php')));
+		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-smt&'.$tweet_post_status.$reply_to, admin_url('admin.php')));
 		exit;
 	}
 }
@@ -1408,9 +1443,11 @@ function azrcrv_tt_schedule_tweet(){
 		$tweet_post_status = 'tweet-failed';
  
 		$option_name = 'scheduled-tweet';
+		$reply_to = '';
 		if (isset($_POST[$option_name])){
 			$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
 			$schedule_id = date("Y-m-d H:i:s");
+			$schedule_id = uniqid();
 			$scheduled_tweets[$schedule_id]['tweet'] = $_POST['tweet'];
 			$scheduled_tweets[$schedule_id]['date'] = $_POST[$option_name]['date'];
 			$scheduled_tweets[$schedule_id]['time'] = $_POST[$option_name]['time'];
@@ -1425,6 +1462,9 @@ function azrcrv_tt_schedule_tweet(){
 			if (count($media) >= 1){
 				$scheduled_tweets[$schedule_id]['media-urls'] = $media;
 			}
+			if ($_POST['reply-to'] != ''){
+				$scheduled_tweets[$schedule_id]['reply-to'] = $_POST['reply-to'];
+			}
 			
 			wp_schedule_single_event(strtotime(
 											$_POST[$option_name]['date'].' '.
@@ -1436,7 +1476,14 @@ function azrcrv_tt_schedule_tweet(){
 			* set status
 			*/
 			$tweet_post_status = 'tweet-scheduled';
+			
 			update_option('azrcrv-tt-scheduled-tweets', $scheduled_tweets);
+			
+			if (isset($_POST['thread'])){
+				$reply_to = '&reply-to='.$schedule_id;
+				$reply_to .= '&date='.$_POST[$option_name]['date'];
+				$reply_to .= '&time='.$_POST[$option_name]['time'];
+			}
 		}
 		/*
 		* Update options
@@ -1444,7 +1491,7 @@ function azrcrv_tt_schedule_tweet(){
 		update_option('azrcrv-tt', $options);
 
 		// Redirect the page to the configuration form that was processed
-		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-st&'.$tweet_post_status, admin_url('admin.php')));
+		wp_redirect(add_query_arg( 'page', 'azrcrv-tt-st&'.$tweet_post_status.$reply_to, admin_url('admin.php')));
 		exit;
 	}
 }
@@ -1492,37 +1539,59 @@ function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
 	
 	if (isset($scheduled_tweets[$schedule_id]['tweet'])){ // AND $token_error != true) {
 		
+		$options = azrcrv_tt_get_option('azrcrv-tt');
+		
 		$parameters = array('status' => $scheduled_tweets[$schedule_id][tweet],);
 		if (isset($scheduled_tweets[$schedule_id]['media-urls'])){
 			$parameters['media-urls'] = $scheduled_tweets[$schedule_id]['media-urls'];
 		}
 		
-		$status = azrcrv_tt_post_tweet($parameters);
+		if (isset($scheduled_tweets[$schedule_id]['reply-to'])){
+			$parameters['in_reply_to_status_id'] = $scheduled_tweets[$schedule_id]['reply-to'];
+		}
+		
+update_option('tweettest-before-'.$schedule_id, $parameters);
+		$tweet_result = azrcrv_tt_post_tweet($parameters);
+update_option('tweettest-after-'.$schedule_id, $tweet_result);
 		
 		$schedule = explode('-', $schedule_id);
 		$post_id = $schedule[0];
+		
+		foreach ($scheduled_tweets as $key => $tweet){
+			if ($tweet['reply-to'] == $schedule_id){
+				$scheduled_tweets[$key]['reply-to'] = $tweet_result['id'];
+				break;
+			}
+		}
+		
 		if (get_post_status($post_id)){
-			$options = azrcrv_tt_get_option('azrcrv-tt');
 			
 			if ($options['record_tweet_history'] == 1){
-				$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
-				if (metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
-
-					$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-					$tweet_history[$dateTime] = $scheduled_tweets[$schedule_id]['tweet'];
-					update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
-
-				} else {
-					update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $scheduled_tweets[$schedule_id]['tweet']));   
-				}
+				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+				if (!is_array($tweet_history)){ $tweet_history = array(); }
+				$tweet_history[] = array(
+													'key' => time(),
+													'date' => date("Y-m-d"),
+													'time' => date("H:i"),
+													'tweet_id' => $tweet_result['id'],
+													'author' => $tweet_result['screen_name'],
+													'tweet' => $scheduled_tweets[$schedule_id]['tweet'],
+												);
+				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 			}
 		}else{
 			$scheduled_tweet_history = get_option('azrcrv-tt-scheduled-tweet-history');
-			$scheduled_tweet_history[$schedule_id]['tweet'] = $scheduled_tweets[$schedule_id]['tweet'];
-			$scheduled_tweet_history[$schedule_id]['date'] = $scheduled_tweets[$schedule_id]['date'];
-			$scheduled_tweet_history[$schedule_id]['time'] = $scheduled_tweets[$schedule_id]['time'];
-			$scheduled_tweet_history[$schedule_id]['status'] = $status;
 			
+			$scheduled_tweet = array();
+			$scheduled_tweet['key'] = time();
+			$scheduled_tweet['tweet_id'] = $tweet_result['id'];
+			$scheduled_tweet['author'] = $tweet_result['screen_name'];
+			$scheduled_tweet['tweet'] = $scheduled_tweets[$schedule_id]['tweet'];
+			$scheduled_tweet['date'] = $scheduled_tweets[$schedule_id]['date'];
+			$scheduled_tweet['time'] = $scheduled_tweets[$schedule_id]['time'];
+			$scheduled_tweet['status'] = $tweet_result['status'];
+			
+			$scheduled_tweet_history[] = $scheduled_tweet;
 			update_option('azrcrv-tt-scheduled-tweet-history', $scheduled_tweet_history);
 		}
 		
@@ -1898,24 +1967,27 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 	
 	$post_tweet = $prefix.$post_tweet.$suffix; //text for your tweet.
 	
-	$tweet_post_status = azrcrv_tt_post_tweet($post_tweet);
+	$tweet_result = azrcrv_tt_post_tweet($post_tweet);
 	
-	if ($tweet_post_status == 200){
+	if ($tweet_result['status'] == 200){
 		update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
-		
-		if ($options['record_tweet_history'] == 1){
-			$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
-			if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
-
-				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-				$tweet_history[$dateTime] = $post_tweet;
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
-
-			} else {
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
-			}
-		}
 	}
+	
+	if ($options['record_tweet_history'] == 1){
+
+		$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+		if (!is_array($tweet_history)){ $tweet_history = array(); }
+		$tweet_history[] = array(
+											'key' => time(),
+											'date' => date("Y-m-d"),
+											'time' => date("H:i"),
+											'tweet_id' => $tweet_result['id'],
+											'author' => $tweet_result['screen_name'],
+											'tweet' => $post_tweet,
+										);
+		update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+	}
+	
 }
 
 /**
@@ -2395,25 +2467,25 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 	
 	$post_tweet = $prefix.$post_tweet.$suffix; //text for your tweet.
 	
-	$tweet_page_status = azrcrv_tt_post_tweet($post_tweet);
+	$tweet_result = azrcrv_tt_post_tweet($post_tweet);
 	
-	//if ($tweet_page_status == 200){
-		update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
-		
-		if ($options['record_tweet_history'] == 1){
-			//$tweet .= ' ('.$tweet_page_status.')';
-			$dateTime = date(get_option('date_format').' '.get_option('time_format'),strtotime(get_option('gmt_offset').' hours'));
-			if(metadata_exists('post',$post_id,'_azrcrv_tt_tweet_history')){
+	update_post_meta($post_id, '_azrcrv_tt_tweeted', 1); // set tweeted flag = true
+	
+	if ($options['record_tweet_history'] == 1){
+		$dateTime = time();
 
-				$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
-				$tweet_history[$dateTime] = $post_tweet;
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
-
-			} else {
-				update_post_meta($post_id, '_azrcrv_tt_tweet_history',array($dateTime => $post_tweet));   
-			}
-		}
-	//}
+			$tweet_history = get_post_meta($post_id, '_azrcrv_tt_tweet_history', true);
+			if (!is_array($tweet_history)){ $tweet_history = array(); }
+			$tweet_history[] = array(
+												'key' => time(),
+												'date' => date("Y-m-d"),
+												'time' => date("H:i"),
+												'tweet_id' => $tweet_result['id'],
+												'author' => $tweet_result['screen_name'],
+												'tweet' => $post_tweet
+											);
+			update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
+	}
 }
 
 /**

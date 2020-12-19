@@ -8,12 +8,16 @@
 		<div class="notice notice-success is-dismissible">
 			<p><strong><?php esc_html_e('Tweet sent'); ?></strong></p>
 		</div>
-	<?php } ?>
-	<?php if( isset($_GET['tweet-failed']) ) { ?>
+	<?php }
+	if( isset($_GET['tweet-failed']) ) { ?>
 		<div class="notice notice-error is-dismissible">
 			<p><strong><?php printf(esc_html__('Tweet failed (status: %d)'), $_GET['tweet-failed']); ?></strong></p>
 		</div>
-	<?php } ?>
+	<?php }
+	if( isset($_GET['reply-to']) ) {
+		$reply_to = $_GET['reply-to'];
+	}
+	?>
 	
     <form method="post" action="admin-post.php">
 		
@@ -34,6 +38,18 @@
 				<div id="the-count" style='float: right;' >
 					<span id="current_counter">0</span><span id="maximum">/240</span>
 				</div>
+				
+				<?php
+				if (isset($reply_to)){
+					$thread = 1;
+					$thread_message = __('Send as part of thread? (unmark to send as last tweet in thread)', 'to-twitter');
+					echo '<input type="hidden" name="reply-to" value="'.$reply_to.'" />';
+				}else{
+					$thread = 0;
+					$thread_message = __('Send as part of thread?', 'to-twitter');
+				}
+				?>
+				<p><label for="thread"><input name="thread" type="checkbox" id="thread" value="1" <?php checked('1', $thread); ?> /><?php echo $thread_message; ?></label></p>
 				<p style="clear: both; " />
 				
 				<div style="width: 100%; display: block; ">
@@ -54,6 +70,7 @@
 						}
 					?>
 				</div>
+				
 				<p style="clear: both; " />
 				<div style="width: 100%x; display: block; padding-top: 12px; ">
 					<input type="submit" style="margin:3px;" value="<?php _e('Send Tweet', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit"/>

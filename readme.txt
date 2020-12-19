@@ -1,12 +1,12 @@
 === To Twitter ===
 
-Description:	Automate the tweeting of posts upon publication or randomly on a schedule.
-Version:		1.14.1
+Description:	Automate the sending of tweets from your ClassicPress site to Twitter.
+Version:		1.15.0
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.14.1/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.15.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -16,27 +16,26 @@ Domain Path:	/languages
 License: 		GPLv2 or later
 License URI: 	http://www.gnu.org/licenses/gpl-2.0.html
 
-Automate the tweeting of posts upon publication or randomly on a schedule.
+Automate the sending of tweets from your ClassicPress site to Twitter.
 
 == Description ==
 
 # Description
 
-Allows posts to be automatically tweeted when they are published or randomly on a schedule.
+To Twitter includes the following functionality;
+ * Automatic tweeting of posts and pages to Twitter as they are published.
+ * Automatic retweeting of posts and pages a user specified period of time after publication.
+ * Scheduled tweeting of posts and pages on a randomly selected basis at a user specified date and time (each day separately configurable).
+ * Automatic adding of hashtags to posts and pages (save draft before manually adding any required hashtags).
+ * Automatic replacement of word or phrases with hashtags (for example, switch the word `ClassicPress` for `@GetClassicPress`).
+ * Sending of manual tweets (including tweet threads).
+ * Sending of scheduled tweets (including tweet threads) at a user specified date and time.
+ * Support for four media images attached to a tweet from posts, pages, manual and scheduled tweets.
+ * Integrates with [Short URLs](https://development.azurecurve.co.uk/classicpress-plugins/short-urls/) from [azurecurve](https://development.azurecurve.co.uk/classicpress-plugins/ for post and page addresses in tweets.
+ * Retain and view tweet history.
+ * Links to tweets on Twitter in tweet history.
 
-Mark the _Post tweet on publish/update?_ checkbox to post tweet when the post is published (works for both immediately and scheduled posts); also allows for an "incase you missed it" retweet on a user-definable delay.
-
-Set hashtags in the hashtags box; these appear after the tweet.
-
-Save a draft of the post to see auto-generated default tweet and amend if necessary; to regenerate default tweet, clear Tweet field and save draft; post URL is represented by a *%s* placeholder.
-
-In the settings you can configure default hashtags for categories and tags to be assigned to tweets (dupicates are removed); word replacements can be configured, allowing you to, for example, switch the word `Microsoft` for `@microsoft`.
-
-Tweet history can be enabled so you can see when a post was tweeted and what the tweet contained.
-
-Integrates with azurecurve's [URL Shortener](https://development.azurecurve.co.uk/classicpress-plugins/url-shortener/) for URL in tweet.
-
-Scheduled tweets to automatically post; history of scheduled tweets is available.
+As scheduled tweets rely on cron for processing, large images can cause timeouts. This can be mitigated by switching off the wp-cron and setting up a cron job on your web host control panel.
 
 This plugin is multisite compatible with each site having its own settings.
 
@@ -64,6 +63,15 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.15.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.15.0)
+ * Add manual tweets to history (when option to record history is set).
+ * Add link to Twitter for tweets on all history sections and pages.
+ * Add thread support to manual tweets.
+ * Add thread support to scheduled tweets.
+ * Update send tweet to record id of sent tweet.
+ * Fix bug with tweet of scheduled post tweet not recording history when tweet send failed.
+ * Fix bug with tweet history either not recording full history or not displaying full history.
 
 ### [Version 1.14.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.14.1)
  * Fix incorrect download link.
