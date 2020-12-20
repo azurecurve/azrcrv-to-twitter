@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.15.0
+ * Version: 1.15.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -1550,9 +1550,7 @@ function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
 			$parameters['in_reply_to_status_id'] = $scheduled_tweets[$schedule_id]['reply-to'];
 		}
 		
-update_option('tweettest-before-'.$schedule_id, $parameters);
 		$tweet_result = azrcrv_tt_post_tweet($parameters);
-update_option('tweettest-after-'.$schedule_id, $tweet_result);
 		
 		$schedule = explode('-', $schedule_id);
 		$post_id = $schedule[0];
