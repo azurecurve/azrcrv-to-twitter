@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the sending of tweets from your ClassicPress site to Twitter.
-Version:		1.15.1
+Version:		1.16.0
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.15.1/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.16.0/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -63,6 +63,15 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.16.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.16.0)
+ * Add tweet send status to all history.
+ * Update post/page meta box to have separate tweet history section.
+ * Update azurecurve menu.
+ * Fix bug in display of tweet history page when no manual or scheduled tweets have been sent.
+ * Fix bug in display of scheduled tweet page when no scheduled tweets are scheduled.
+ * Fix bug in display of scheduled tweet history page when no scheduled tweets have been sent.
+ * Fix bug where blank tweet sent if no random scheduled page or post could be found.
 
 ### [Version 1.15.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.15.1)
  * Remove debug code.
@@ -188,7 +197,7 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 Some of the top plugins available from **azurecurve** are:
 * [Add Twitter Cards](https://development.azurecurve.co.uk/classicpress-plugins/add-twitter-cards/)
 * [Breadcrumbs](https://development.azurecurve.co.uk/classicpress-plugins/breadcrumbs/)
-* [Series Index](https://development.azurecurve.co.uk/classicpress-plugins/series-index/)
+* [SMTP](https://development.azurecurve.co.uk/classicpress-plugins/smtp/)
 * [To Twitter](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
 * [Theme Switcher](https://development.azurecurve.co.uk/classicpress-plugins/theme-switcher/)
 * [Toggle Show/Hide](https://development.azurecurve.co.uk/classicpress-plugins/toggle-showhide/)

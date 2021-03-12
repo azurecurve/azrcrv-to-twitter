@@ -93,20 +93,22 @@
 					<?php
 						$found = false;
 						$scheduled_tweets = get_option('azrcrv-tt-scheduled-tweets');
-						foreach ($scheduled_tweets as $key => $tweet){
-							$found = true;
-						?>
-							<tr><td><form style="display:inline;" method="post" action="admin-post.php">
-							<?php wp_nonce_field('azrcrv-tt-dst', 'azrcrv-tt-dst-nonce'); ?>
-							<input type="hidden" name="action" value="azrcrv_tt_delete_scheduled_tweet" />
-									<input type="hidden" name="tweettodelete" value="<?php echo $key; ?>" class="short-text" />
-									<input style="display:inline;" type="image" src="<?php echo plugin_dir_url(dirname(__FILE__)); ?>assets/images/delete.png" name="delete" title="Delete" alt="Delete" value="Delete" class="azrcrv-tt"/></div>
-								</form></td>
-								<td style="width: 100px; text-align: center; "><?php echo $tweet['date']; ?></td>
-								<td style="width: 80px; text-align: center; "><?php echo $tweet['time']; ?></td>
-								<td style="width: 400px; "><?php echo $tweet['tweet']; ?></td>
-							</tr>
-							<?php
+						if (is_array($scheduled_tweets)){
+							foreach ($scheduled_tweets as $key => $tweet){
+								$found = true;
+							?>
+								<tr><td><form style="display:inline;" method="post" action="admin-post.php">
+								<?php wp_nonce_field('azrcrv-tt-dst', 'azrcrv-tt-dst-nonce'); ?>
+								<input type="hidden" name="action" value="azrcrv_tt_delete_scheduled_tweet" />
+										<input type="hidden" name="tweettodelete" value="<?php echo $key; ?>" class="short-text" />
+										<input style="display:inline;" type="image" src="<?php echo plugin_dir_url(dirname(__FILE__)); ?>assets/images/delete.png" name="delete" title="Delete" alt="Delete" value="Delete" class="azrcrv-tt"/></div>
+									</form></td>
+									<td style="width: 100px; text-align: center; "><?php echo $tweet['date']; ?></td>
+									<td style="width: 80px; text-align: center; "><?php echo $tweet['time']; ?></td>
+									<td style="width: 400px; "><?php echo $tweet['tweet']; ?></td>
+								</tr>
+								<?php
+							}
 						}
 						if (!$found){
 							echo '<tr><td></td><td></td><td></td><td><em>'.__('No scheduled tweets found.', 'azrcrv-tt').'</em></td></tr>';
@@ -127,20 +129,22 @@
 				<?php
 					$found = false;
 					$scheduled_tweet_history = get_option('azrcrv-tt-scheduled-tweet-history');
-					$tweet_history = array_reverse($scheduled_tweet_history, true);
-					foreach ($tweet_history as $key => $tweet){
-						$found = true;
-						if ($tweet['status'] == 200){
-							$status = $tweet['status'];
-						}else{
-							$status = '<span style="color: red; font-weight:900;">'.$tweet['status'].'</span>';
+					if (is_array($scheduled_tweet_history)){
+						$tweet_history = array_reverse($scheduled_tweet_history, true);
+						foreach ($tweet_history as $key => $tweet){
+							$found = true;
+							if ($tweet['status'] == 200){
+								$status = $tweet['status'];
+							}else{
+								$status = '<span style="color: red; font-weight:900;">'.$tweet['status'].'</span>';
+							}
+							if (isset($tweet['author']) AND strlen($tweet['author']) > 0){
+								$tweet_link = '<a href="https://twitter.com/'.$tweet['author'].'/status/'.$tweet['tweet_id'].'" style="text-decoration: none; "><span class="dashicons dashicons-twitter"></span></a>&nbsp';
+							}else{
+								$tweet_link = '';
+							}
+							echo '<tr><td style="width: 100px; text-align: center; ">'.$tweet['date'].'</td><td style="width: 80px; text-align: center; ">'.$tweet['time'].'</td><td style="width: 80px; text-align: center; ">'.$status.'</td><td style="width: 300px; text-align: left; ">'.$tweet_link.$tweet['tweet'].'</td></tr>';
 						}
-						if (isset($tweet['author']) AND strlen($tweet['author']) > 0){
-							$tweet_link = '<a href="https://twitter.com/'.$tweet['author'].'/status/'.$tweet['tweet_id'].'" style="text-decoration: none; "><span class="dashicons dashicons-twitter"></span></a>&nbsp';
-						}else{
-							$tweet_link = '';
-						}
-						echo '<tr><td style="width: 100px; text-align: center; ">'.$tweet['date'].'</td><td style="width: 80px; text-align: center; ">'.$tweet['time'].'</td><td style="width: 80px; text-align: center; ">'.$status.'</td><td style="width: 300px; text-align: left; ">'.$tweet_link.$tweet['tweet'].'</td></tr>';
 					}
 					if (!$found){
 						echo '<tr><td></td><td></td><td></td><td><em>'.__('No scheduled tweet history found.', 'azrcrv-tt').'</em></td></tr>';

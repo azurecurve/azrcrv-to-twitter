@@ -3,14 +3,14 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.15.1
+ * Version: 1.16.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
  * Text Domain: to-twitter
  * Domain Path: /languages
  * ------------------------------------------------------------------------------
- * This is free sottware released under the terms of the General Public License,
+ * This is free software released under the terms of the General Public License,
  * version 2, or later. It is distributed WITHOUT ANY WARRANTY; without even the
  * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. Full
  * text of the license is available at https://www.gnu.org/licenses/gpl-2.0.html.
@@ -62,6 +62,7 @@ add_action('admin_menu', 'azrcrv_tt_add_sidebar_metabox');
 add_action('save_post', 'azrcrv_tt_save_sidebar_metabox', 10, 1);
 add_action('add_meta_boxes', 'azrcrv_tt_create_tweet_metabox');
 add_action('save_post', 'azrcrv_tt_save_tweet_metabox', 11, 2);
+add_action('add_meta_boxes', 'azrcrv_tt_create_tweet_history_metabox');
 add_action('wp_insert_post', 'azrcrv_tt_autopost_tweet', 12, 2);
 add_action('transition_post_status', 'azrcrv_tt_post_status_transition', 13, 3);
 add_action('admin_post_azrcrv_tt_save_options', 'azrcrv_tt_save_options');
@@ -404,7 +405,20 @@ function azrcrv_tt_create_admin_menu(){
  *
  */
 function azrcrv_tt_add_sidebar_metabox(){
-	add_meta_box('azrcrv-tt-box', esc_html__('Autopost Tweet', 'to-twitter'), 'azrcrv_tt_generate_sidebar_metabox', array('post','page'), 'side', 'default');	
+	
+	$post_types = array('post','page');
+	
+	add_meta_box('azrcrv-tt-box', esc_html__('Autopost Tweet', 'to-twitter'), 'azrcrv_tt_generate_sidebar_metabox', $post_types, 'side', 'default');	
+}
+
+/**
+ * Check if other plugin active.
+ *
+ * @since 1.16.0
+ *
+ */
+function azrcrv_tt_is_plugin_active($plugin){
+    return in_array($plugin, (array) get_option('active_plugins', array()));
 }
 
 /**
@@ -444,11 +458,7 @@ function azrcrv_tt_generate_sidebar_metabox(){
 	<p class="autopost">
 		<?php wp_nonce_field(basename(__FILE__), 'azrcrv-tt-nonce');
 		if ($tweeted == 1){
-			if ($post->post_type == 'post'){
-				printf( '<p>'.esc_html__('This post has already been tweeted', 'to-twitter').'</p>');
-			}else{
-				printf( '<p>'.esc_html__('This page has already been tweeted', 'to-twitter').'</p>');
-			}
+			printf( '<p>'.esc_html__('This %s has already been tweeted', 'to-twitter').'</p>', $post->post_type == 'post');
 		}
 		?>
 		<p><input type="checkbox" name="autopost" <?php if( $autopost == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post tweet on publish/update?', 'to-twitter'); ?></p>
@@ -576,14 +586,14 @@ function azrcrv_tt_save_sidebar_metabox($post_id){
  *
  */
 function azrcrv_tt_create_tweet_metabox() {
-
-	// Can only be used on a single post type (ie. page or post or a custom post type).
-	// Must be repeated for each post type you want the metabox to appear on.
+	
+	$post_types = array('post','page');
+	
 	add_meta_box(
 		'azrcrv_tt_tweet_metabox', // Metabox ID
 		'Tweet', // Title to display
 		'azrcrv_tt_render_tweet_metabox', // Function to call that contains the metabox content
-		array('post','page'), // Post type to display metabox on
+		$post_types, // Post type to display metabox on
 		'normal', // Where to put it (normal = main colum, side = sidebar, etc.)
 		'default' // Priority relative to other metaboxes
 	);
@@ -601,6 +611,7 @@ function azrcrv_tt_render_tweet_metabox() {
 	global $post; // Get the current post data
 	$post_tweet = get_post_meta($post->ID, '_azrcrv_tt_post_tweet', true); // Get the saved values
 	$post_media = get_post_meta($post->ID, '_azrcrv_tt_post_tweet_media', true); // Get the saved values
+	
 	?>
 
 		<fieldset>
@@ -617,9 +628,11 @@ function azrcrv_tt_render_tweet_metabox() {
 									value="<?php echo esc_attr($post_tweet); ?>"
 								>
 							</p>
-							<p>
-								<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%u</strong>'); ?>
-							</p>
+							<?php if (!$post->post_type == 'widget-announcement'){ ?>
+								<p>
+									<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%u</strong>'); ?>
+								</p>
+							<?php } ?>
 							<p>	
 								<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
 							</p>
@@ -663,26 +676,6 @@ function azrcrv_tt_render_tweet_metabox() {
 								
 								<p style="clear: both; padding-bottom: 6px; " />
 							</p>
-							<p>
-							<?php
-							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
-								echo '<strong>'.__('Previous Tweets', 'to-twitter').'</strong><br />';
-								foreach(array_reverse(get_post_meta($post->ID, '_azrcrv_tt_tweet_history', true )) as $key => $tweet){
-									if (is_array($tweet)){ $tweet_detail = $tweet['tweet']; }else{ $tweet_detail = $tweet; }
-									
-									if (isset($tweet['key'])){ $tweet_date = $tweet['key']; }else{ $tweet_date = strtotime($key); }
-									$tweet_date = date('d/m/Y H:i', $tweet_date);
-									
-									if (isset($tweet['author']) AND strlen($tweet['author']) > 0){
-										$tweet_link = '<a href="https://twitter.com/'.$tweet['author'].'/status/'.$tweet['tweet_id'].'" style="text-decoration: none; "><span class="dashicons dashicons-twitter"></span></a>&nbsp';
-									}else{
-										$tweet_link = '';
-									}
-									echo '•&nbsp;'.$tweet_date.' - <em>'.$tweet_link.$tweet_detail.'</em><br />';
-								}	
-							}
-							?>
-							</p>
 						<td>
 					</tr>
 				</table>
@@ -720,7 +713,10 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 		return $post->ID;
 	}
 	
+	$options = azrcrv_tt_get_option('azrcrv-tt');
+	
 	if (strlen($_POST['post_tweet']) == 0){
+		
 		$additional_hashtags_string = get_post_meta($post->ID, '_azrcrv_tt_hashtags', true);
 		
 		if (strlen($additional_hashtags_string) == 0){
@@ -729,9 +725,6 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 			$additional_hashtags = explode(' ', $additional_hashtags_string);
 		}
 		
-		$tweet = $post->post_title;
-		
-		$options = azrcrv_tt_get_option('azrcrv-tt');
 		
 		foreach($options['word-replacement'] as $word => $replacement){
 			if (stristr($tweet, $word)){
@@ -743,14 +736,18 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 		}
 		$additional_hashtags_string = implode(' ', $additional_hashtags);
 		
+		$tweet = $post->post_title;
+		
 		if ($post_type == 'post'){
 			$post_tweet = $options['default-post-tweet-format'];
 		}else{
 			$post_tweet = $options['default-page-tweet-format'];
 		}
+		
 		if (!isset($post_tweet)||$post_tweet == ''){
 			$post_tweet = '%t %u %h';
 		}
+		
 		$post_tweet = str_replace('%t', $tweet, $post_tweet);
 		$post_tweet = str_replace('%h', $additional_hashtags_string, $post_tweet);
 		
@@ -774,9 +771,93 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
 	}
 	
 	// Save our submissions to the database
-	update_post_meta( $post->ID, '_azrcrv_tt_post_tweet', $post_tweet );
-	update_post_meta( $post->ID, '_azrcrv_tt_post_tweet_media', $media);
+	update_post_meta($post->ID, '_azrcrv_tt_post_tweet', $post_tweet);
+	update_post_meta($post->ID, '_azrcrv_tt_post_tweet_media', $media);
 
+}
+
+/**
+ * Create the post tweet metabox
+ *
+ * @since 1.0.0
+ *
+ */
+function azrcrv_tt_create_tweet_history_metabox() {
+	
+	global $post; // Get the current post data
+	
+	if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
+	
+		$post_types = array('post','page');
+		
+		add_meta_box(
+			'azrcrv_tt_tweet_history_metabox', // Metabox ID
+			'Tweet History', // Title to display
+			'azrcrv_tt_render_tweet_history_metabox', // Function to call that contains the metabox content
+			$post_types, // Post type to display metabox on
+			'normal', // Where to put it (normal = main colum, side = sidebar, etc.)
+			'default' // Priority relative to other metaboxes
+		);
+	}
+
+}
+
+/**
+ * Render the post tweet metabox markup
+ *
+ * @since 1.0.0
+ *
+ */
+function azrcrv_tt_render_tweet_history_metabox() {
+	// Variables
+	global $post; // Get the current post data
+	
+	?>
+
+		<fieldset>
+			<div>
+				<table style="width: 100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 100%;">
+							<p>
+							<?php
+							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
+								echo '<strong>'.__('Previous Tweets', 'to-twitter').'</strong><br />';
+								foreach(array_reverse(get_post_meta($post->ID, '_azrcrv_tt_tweet_history', true )) as $key => $tweet){
+									if (is_array($tweet)){ $tweet_detail = $tweet['tweet']; }else{ $tweet_detail = $tweet; }
+									
+									if (isset($tweet['key'])){ $tweet_date = $tweet['key']; }else{ $tweet_date = strtotime($key); }
+									$tweet_date = date('d/m/Y H:i', $tweet_date);
+									
+									if (isset($tweet['status'])){
+										if ($tweet['status'] == ''){
+											$status = '';
+										}elseif ($tweet['status'] == 200){
+											$status = ' '.$tweet['status'].' - ';
+										}else{
+											$status = ' <span style="color: red; font-weight:900;">'.$tweet['status'].'</span> - ';
+										}
+									}else{
+										$status = '';
+									}
+									
+									if (isset($tweet['author']) AND strlen($tweet['author']) > 0){
+										$tweet_link = '<a href="https://twitter.com/'.$tweet['author'].'/status/'.$tweet['tweet_id'].'" style="text-decoration: none; "><span class="dashicons dashicons-twitter"></span></a>&nbsp';
+									}else{
+										$tweet_link = '';
+									}
+									echo '•&nbsp;'.$tweet_date.' - '.$status.'<em>'.$tweet_link.$tweet_detail.'</em><br />';
+								}	
+							}
+							?>
+							</p>
+						<td>
+					</tr>
+				</table>
+			</div>
+		</fieldset>
+
+	<?php
 }
 
 /**
@@ -785,8 +866,9 @@ function azrcrv_tt_save_tweet_metabox( $post_id, $post ) {
  * @since 1.0.0
  *
  */
-function azrcrv_tt_post_status_transition($new_status, $old_status, $post) { 
-    if (($post->post_type == 'post'||$post->post_type == 'page') && $new_status == 'publish'){	// && $old_status != 'publish') {
+function azrcrv_tt_post_status_transition($new_status, $old_status, $post){
+	
+	if (($post->post_type == 'post'||$post->post_type == 'page') && $new_status == 'publish'){	// && $old_status != 'publish') {
 		azrcrv_tt_autopost_tweet($post->ID, $post);
     }
 }
@@ -802,12 +884,12 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 	
 	if (($post->post_type == 'post'||$post->post_type == 'page') && $post->post_status == 'publish'){
 		
-		$autopost = get_post_meta( $post->ID, '_azrcrv_tt_autopost', true );
+		$autopost = get_post_meta($post->ID, '_azrcrv_tt_autopost', true);
 		
 		if ($autopost == 1){
 			
-			$post_tweet = get_post_meta( $post_id, '_azrcrv_tt_post_tweet', true ); // get tweet content
-			$post_media = get_post_meta( $post_id, '_azrcrv_tt_post_tweet_media', true ); // get tweet content
+			$post_tweet = get_post_meta($post_id, '_azrcrv_tt_post_tweet', true); // get tweet content
+			$post_media = get_post_meta($post_id, '_azrcrv_tt_post_tweet_media', true); // get tweet media
 			
 			if (strlen($post_tweet) > 0){
 			
@@ -838,6 +920,7 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
 														'tweet_id' => $tweet_result['id'],
 														'author' => $tweet_result['screen_name'],
 														'tweet' => $post_tweet,
+														'status' => $tweet_result['status'],
 													);
 					update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 				}
@@ -1574,6 +1657,7 @@ function azrcrv_tt_send_scheduled_tweet( $schedule_id ) {
 													'tweet_id' => $tweet_result['id'],
 													'author' => $tweet_result['screen_name'],
 													'tweet' => $scheduled_tweets[$schedule_id]['tweet'],
+													'status' => $tweet_result['status'],
 												);
 				update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 			}
@@ -1885,6 +1969,9 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 	$sql = azrcrv_tt_select_scheduled_random_post_tweet(date('w'));
 	
 	$post_id = $wpdb->get_var($sql);
+	
+	if ($post_id == null){ return; }
+	
 	$post = get_post($post_id);
 	
 	$options = azrcrv_tt_get_option('azrcrv-tt');
@@ -1982,6 +2069,7 @@ function azrcrv_tt_scheduled_post_send_tweet(){
 											'tweet_id' => $tweet_result['id'],
 											'author' => $tweet_result['screen_name'],
 											'tweet' => $post_tweet,
+											'status' => $tweet_result['status'],
 										);
 		update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 	}
@@ -2412,6 +2500,9 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 	$sql = azrcrv_tt_select_scheduled_random_page_tweet(date('w'));
 	
 	$post_id = $wpdb->get_var($sql);
+	
+	if ($post_id == null){ return; }
+	
 	$post = get_post($post_id);
 	
 	$options = azrcrv_tt_get_option('azrcrv-tt');
@@ -2480,7 +2571,8 @@ function azrcrv_tt_scheduled_page_send_tweet(){
 												'time' => date("H:i"),
 												'tweet_id' => $tweet_result['id'],
 												'author' => $tweet_result['screen_name'],
-												'tweet' => $post_tweet
+												'tweet' => $post_tweet,
+												'status' => $tweet_result['status'],
 											);
 			update_post_meta($post_id, '_azrcrv_tt_tweet_history',$tweet_history);
 	}
