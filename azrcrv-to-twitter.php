@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.16.0
+ * Version: 1.16.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -327,7 +327,7 @@ function azrcrv_tt_add_plugin_action_link($links, $file){
 	}
 
 	if ($file == $this_plugin){
-		$settings_link = '<a href="'.admin_url('admin.php?page=azrcrv-tt').'"><img src="'.plugins_url('/pluginmenu/images/Favicon-16x16.png', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'to-twitter').'</a>';
+		$settings_link = '<a href="'.admin_url('admin.php?page=azrcrv-tt').'"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-top: 2px; margin-right: -5px; height: 16px; width: 16px;" alt="azurecurve" />'.esc_html__('Settings' ,'to-twitter').'</a>';
 		array_unshift($links, $settings_link);
 	}
 
@@ -994,7 +994,7 @@ function azrcrv_tt_autopost_tweet($post_id, $post){
  *
  */
 function azrcrv_tt_post_tweet($parameters){
-				
+	
 	$options = azrcrv_tt_get_option('azrcrv-tt');
 	
 	define('CONSUMER_KEY', $options['access_key']);
@@ -1005,7 +1005,7 @@ function azrcrv_tt_post_tweet($parameters){
 	$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET);
 	
 	if (!is_array($parameters)){
-		$parameters = array('status' => $parameters,);
+		$parameters = array('status' => $parameters);
 	}elseif (isset($parameters['media-urls'])){
 		foreach ($parameters['media-urls'] AS $media_to_upload){
 			$media_upload = $connection->upload(

@@ -6,8 +6,8 @@ if (! defined('WP_UNINSTALL_PLUGIN')){
 
 // Options to remove
 $options = array(
-    'azrcrv-tt'
-    'azrcrv-tt-scheduled-tweets'
+    'azrcrv-tt',
+    'azrcrv-tt-scheduled-tweets',
     'azrcrv-tt-scheduled-tweet-history'
 );
 

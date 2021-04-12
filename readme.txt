@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the sending of tweets from your ClassicPress site to Twitter.
-Version:		1.16.0
+Version:		1.16.1
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.16.0/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.16.1/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -64,6 +64,10 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
+### [Version 1.16.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.16.1)
+ * Fix missing icon.
+ * Fix issue in uninstall.php file stopping plugin being uninstalled.
+ 
 ### [Version 1.16.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.16.0)
  * Add tweet send status to all history.
  * Update post/page meta box to have separate tweet history section.
