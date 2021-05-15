@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.16.1
+ * Version: 1.17.0
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -343,8 +343,8 @@ function azrcrv_tt_add_plugin_action_link($links, $file){
 function azrcrv_tt_create_admin_menu(){
 	
     add_menu_page(
-				__('To Twitter', 'to-twitter')
-				,__('To Twitter','to-twitter')
+				esc_html__('To Twitter', 'to-twitter')
+				,esc_html__('To Twitter','to-twitter')
 				,'manage_options'
 				,'azrcrv-tt'
 				,'azrcrv_tt_display_options'
@@ -352,24 +352,24 @@ function azrcrv_tt_create_admin_menu(){
     
 	add_submenu_page(
 				'azrcrv-tt'
-				,__('Settings', 'to-twitter')
-				,__('Settings', 'to-twitter')
+				,esc_html__('Settings', 'to-twitter')
+				,esc_html__('Settings', 'to-twitter')
 				,'manage_options'
 				,'azrcrv-tt'
 				,'azrcrv_tt_display_options');
 				
     add_submenu_page(
 				'azrcrv-tt'
-				,__('Send Tweet', 'to-twitter')
-				,__('Send Tweet', 'to-twitter')
+				,esc_html__('Send Tweet', 'to-twitter')
+				,esc_html__('Send Tweet', 'to-twitter')
 				,'manage_options'
 				,'azrcrv-tt-smt'
 				,'azrcrv_tt_display_send_manual_tweet');
 				
     add_submenu_page(
 				'azrcrv-tt'
-				,__('Scheduled Tweets', 'to-twitter')
-				,__('Scheduled Tweets', 'to-twitter')
+				,esc_html__('Scheduled Tweets', 'to-twitter')
+				,esc_html__('Scheduled Tweets', 'to-twitter')
 				,'manage_options'
 				,'azrcrv-tt-st'
 				,'azrcrv_tt_display_schedule_tweet');
@@ -378,16 +378,16 @@ function azrcrv_tt_create_admin_menu(){
 	if ($options['record_tweet_history'] == 1){
 		add_submenu_page(
 					'azrcrv-tt'
-					,__('Tweet History', 'to-twitter')
-					,__('Tweet History', 'to-twitter')
+					,esc_html__('Tweet History', 'to-twitter')
+					,esc_html__('Tweet History', 'to-twitter')
 					,'manage_options'
 					,'azrcrv-tt-th'
 					,'azrcrv_tt_display_tweet_history');
 	}
 	
 	add_submenu_page("azrcrv-plugin-menu"
-						,__("To Twitter", "to-twitter")
-						,__("To Twitter", "to-twitter")
+						,esc_html__("To Twitter", "to-twitter")
+						,esc_html__("To Twitter", "to-twitter")
 						,'manage_options'
 						,'azrcrv-tt'
 						,'azrcrv_tt_display_options');
@@ -630,11 +630,11 @@ function azrcrv_tt_render_tweet_metabox() {
 							</p>
 							<?php if (!$post->post_type == 'widget-announcement'){ ?>
 								<p>
-									<?php printf(__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%u</strong>'); ?>
+									<?php printf(esc_html__('%s placeholder is replaced with the URL when the post is published.', 'to-twitter'), '<strong>%u</strong>'); ?>
 								</p>
 							<?php } ?>
 							<p>	
-								<?php printf(__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
+								<?php printf(esc_html__('To regenerate tweet blank the field and update post.', 'to-twitter'), '%s'); ?>
 							</p>
 							<p>
 								<?php
@@ -667,8 +667,8 @@ function azrcrv_tt_render_tweet_metabox() {
 											echo '<div style="float: left; width: 170px; text-align: center; ">';
 												echo '<img src="'.$media['image'].'" id="tweet-image-'.$key.'" style="width: 160px;"><br />';
 												echo '<input type="hidden" name="tweet-selected-image-'.$key.'" id="tweet-selected-image-'.$key.'" value="'.$media['value'].'" class="regular-text" />';
-												echo '<input type="button" id="azrcrv-tt-upload-image-'.$key.'" class="button upload" value="'.__('Upload', 'to-twitter').'" />&nbsp;';
-												echo '<input type="button" id="azrcrv-tt-remove-image-'.$key.'" class="button remove" value="'.__( 'Remove', 'to-twitter').'" />';
+												echo '<input type="button" id="azrcrv-tt-upload-image-'.$key.'" class="button upload" value="'.esc_html__('Upload', 'to-twitter').'" />&nbsp;';
+												echo '<input type="button" id="azrcrv-tt-remove-image-'.$key.'" class="button remove" value="'.esc_html__( 'Remove', 'to-twitter').'" />';
 											echo '</div>';
 										}
 									?>
@@ -822,7 +822,7 @@ function azrcrv_tt_render_tweet_history_metabox() {
 							<p>
 							<?php
 							if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
-								echo '<strong>'.__('Previous Tweets', 'to-twitter').'</strong><br />';
+								echo '<strong>'.esc_html__('Previous Tweets', 'to-twitter').'</strong><br />';
 								foreach(array_reverse(get_post_meta($post->ID, '_azrcrv_tt_tweet_history', true )) as $key => $tweet){
 									if (is_array($tweet)){ $tweet_detail = $tweet['tweet']; }else{ $tweet_detail = $tweet; }
 									
@@ -1040,7 +1040,7 @@ function azrcrv_tt_post_tweet($parameters){
 function azrcrv_tt_display_options(){
 
 	if (!current_user_can('manage_options')) {
-		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+		wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'to-twitter'));
 	}
 	
 	$options = azrcrv_tt_get_option('azrcrv-tt');
@@ -1371,7 +1371,7 @@ function azrcrv_tt_save_options(){
 function azrcrv_tt_display_send_manual_tweet(){
 
 	if (!current_user_can('manage_options')) {
-		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+		wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'to-twitter'));
 	}
 	
 	$azrcrv_tt = azrcrv_tt_get_option('azrcrv-tt');
@@ -1390,13 +1390,13 @@ function azrcrv_tt_send_tweet(){
 	
 	// Check that user has proper security level
 	if (!current_user_can('manage_options')){
-		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
+		wp_die(esc_html__('You do not have permissions to perform this action', 'to-twitter'));
 	}
 	// Check that nonce field created in configuration form is present
 	if (! empty($_POST) && check_admin_referer('azrcrv-tt-smt', 'azrcrv-tt-smt-nonce')){
 	
 		if (!function_exists('curl_init')) {
-			error_log(__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
+			error_log(esc_html__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
 			return;
 		}
 		
@@ -1470,7 +1470,7 @@ function azrcrv_tt_send_tweet(){
 function azrcrv_tt_display_schedule_tweet(){
 
 	if (!current_user_can('manage_options')) {
-		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+		wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'to-twitter'));
 	}
 	
 	$azrcrv_tt = azrcrv_tt_get_option('azrcrv-tt');
@@ -1487,7 +1487,7 @@ function azrcrv_tt_display_schedule_tweet(){
 function azrcrv_tt_display_tweet_history(){
 
 	if (!current_user_can('manage_options')) {
-		wp_die(__('You do not have sufficient permissions to access this page.', 'to-twitter'));
+		wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'to-twitter'));
 	}
 	
 	$options = azrcrv_tt_get_option('azrcrv-tt');
@@ -1505,7 +1505,7 @@ function azrcrv_tt_schedule_tweet(){
 	
 	// Check that user has proper security level
 	if (!current_user_can('manage_options')){
-		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
+		wp_die(esc_html__('You do not have permissions to perform this action', 'to-twitter'));
 	}
 	// Check that nonce field created in configuration form is present
 	if (! empty($_POST) && check_admin_referer('azrcrv-tt-st', 'azrcrv-tt-st-nonce')){
@@ -1513,7 +1513,7 @@ function azrcrv_tt_schedule_tweet(){
 		$options = azrcrv_tt_get_option('azrcrv-tt');
 	
 		if (!function_exists('curl_init')) {
-			error_log(__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
+			error_log(esc_html__('The To Twitter plugin requires CURL libraries', 'to-twitter'));
 			return;
 		}
 		
@@ -1589,7 +1589,7 @@ function azrcrv_tt_delete_scheduled_tweet(){
 	
 	// Check that user has proper security level
 	if (!current_user_can('manage_options')){
-		wp_die(__('You do not have permissions to perform this action', 'to-twitter'));
+		wp_die(esc_html__('You do not have permissions to perform this action', 'to-twitter'));
 	}
 	// Check that nonce field created in configuration form is present
 	if (! empty($_POST) && check_admin_referer('azrcrv-tt-dst', 'azrcrv-tt-dst-nonce')){

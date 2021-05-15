@@ -1,9 +1,14 @@
 <?php $options = azrcrv_tt_get_option('azrcrv-tt'); ?>
 
 <div class="wrap arcrv-tt">
-
-	<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-
+	
+	<h1>
+		<?php
+			echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+			esc_html_e(get_admin_page_title());
+		?>
+	</h1>
+	
 	<?php if( isset($_GET['settings-updated']) ) { ?>
 		<div class="notice notice-success is-dismissible">
 			<p><strong><?php esc_html_e('Settings have been saved.', 'to-twitter') ?></strong></p>
@@ -26,29 +31,29 @@
 	?>
 
 	<h2 class="nav-tab-wrapper nav-tab-wrapper-azrcrv-tt">
-		<a class="nav-tab <?php if ($showappsettings == true){ echo 'nav-tab-active'; } ?>" data-item=".tabs-1" href="#tabs-1"><?php _e('App Settings', 'to-twitter') ?></a>
-		<a class="nav-tab <?php if ($showappsettings == false){ echo 'nav-tab-active'; } ?>" data-item=".tabs-2" href="#tabs-2"><?php _e('Tweet Settings', 'to-twitter') ?></a>
-		<a class="nav-tab" data-item=".tabs-3" href="#tabs-3"><?php _e('Category Hashtags', 'to-twitter') ?></a>
-		<a class="nav-tab" data-item=".tabs-4" href="#tabs-4"><?php _e('Tag Hashtags', 'to-twitter') ?></a>
-		<a class="nav-tab" data-item=".tabs-5" href="#tabs-5"><?php _e('Word Replace', 'to-twitter') ?></a>
-		<a class="nav-tab" data-item=".tabs-6" href="#tabs-6"><?php _e('Schedule Random Post', 'to-twitter') ?></a>
-		<a class="nav-tab" data-item=".tabs-7" href="#tabs-7"><?php _e('Schedule Random Page', 'to-twitter') ?></a>
-		<input type="submit" style="float: left; margin: 6px; margin-bottom: 3px " value="<?php _e('Save Settings', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit" />
+		<a class="nav-tab <?php if ($showappsettings == true){ echo 'nav-tab-active'; } ?>" data-item=".tabs-1" href="#tabs-1"><?php esc_html_e('App Settings', 'to-twitter') ?></a>
+		<a class="nav-tab <?php if ($showappsettings == false){ echo 'nav-tab-active'; } ?>" data-item=".tabs-2" href="#tabs-2"><?php esc_html_e('Tweet Settings', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-3" href="#tabs-3"><?php esc_html_e('Category Hashtags', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-4" href="#tabs-4"><?php esc_html_e('Tag Hashtags', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-5" href="#tabs-5"><?php esc_html_e('Word Replace', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-6" href="#tabs-6"><?php esc_html_e('Schedule Random Post', 'to-twitter') ?></a>
+		<a class="nav-tab" data-item=".tabs-7" href="#tabs-7"><?php esc_html_e('Schedule Random Page', 'to-twitter') ?></a>
+		<input type="submit" style="float: left; margin: 6px; margin-bottom: 3px " value="<?php esc_html_e('Save Settings', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit" />
 	</h2>
 
 	<div>
 		<div class="azrcrv_tt_tabs <?php if ($showappsettings == false){ echo 'invisible'; } ?> tabs-1">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Consumer key','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Consumer key','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_key" class="regular-text" value="<?php echo $options['access_key']; ?>"></p>
 				
-				<p> <span class="description"><?php _e('Consumer secret','to-twitter') ?>:</span><br/>
+				<p> <span class="description"><?php esc_html_e('Consumer secret','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_secret" class="regular-text" value="<?php echo $options['access_secret']; ?>"></p>
 				
-				<p><span class="description"><?php _e('Access token','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Access token','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_token" class="regular-text" value="<?php echo $options['access_token']; ?>"></p>
 				
-				<p><span class="description"><?php _e('Access token secret','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Access token secret','to-twitter') ?>:</span><br/>
 				<input type="text" name="access_token_secret" class="regular-text" value="<?php echo $options['access_token_secret']; ?>"></p>
 			</p>
 		</div>
@@ -56,7 +61,7 @@
 		<div class="azrcrv_tt_tabs <?php if ($showappsettings == true){ echo 'invisible'; } ?> tabs-2">
 			<p class="azrcrv_tt_horiz">
 			
-				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Tweet Settings', 'to-twitter'); ?></h4>
 				
 				<?php
 					if (isset($options['prefix_tweets_with_dot'])){
@@ -65,7 +70,7 @@
 						$prefix_tweets_with_dot = '';
 					}
 				?>
-				<p><label for="prefix_tweets_with_dot"><input name="prefix_tweets_with_dot" type="checkbox" id="prefix_tweets_with_dot" value="1" <?php checked('1', $prefix_tweets_with_dot); ?> /><?php _e('Prefix tweets with a dot which start with @?', 'to-twitter'); ?></label></p>
+				<p><label for="prefix_tweets_with_dot"><input name="prefix_tweets_with_dot" type="checkbox" id="prefix_tweets_with_dot" value="1" <?php checked('1', $prefix_tweets_with_dot); ?> /><?php esc_html_e('Prefix tweets with a dot which start with @?', 'to-twitter'); ?></label></p>
 				
 				<?php
 					if (isset($options['record_tweet_history'])){
@@ -74,11 +79,11 @@
 						$record_tweet_history = '';
 					}
 				?>
-				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $record_tweet_history); ?> /><?php _e('Record tweet history?', 'to-twitter'); ?></label></p>
+				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $record_tweet_history); ?> /><?php esc_html_e('Record tweet history?', 'to-twitter'); ?></label></p>
 				
-				<h4><?php _e('Post Settings', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Post Settings', 'to-twitter'); ?></h4>
 				
-				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php _e('Autopost new posts?', 'to-twitter'); ?></label></p>
+				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php esc_html_e('Autopost new posts?', 'to-twitter'); ?></label></p>
 				
 				<?php
 					if (isset($options['default-post-tweet-format'])){
@@ -87,9 +92,9 @@
 						$default_post_tweet_format = '%t %u %h';
 					}
 				?>
-				<p><span class="description"><?php _e('Default post tweet format','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Default post tweet format','to-twitter') ?>:</span><br/>
 				<input type="text" name="default-post-tweet-format" class="regular-text" value="<?php echo $default_post_tweet_format; ?>"><br />
-				<span class="description"><?php _e('The following placeholders can be used:
+				<span class="description"><?php esc_html_e('The following placeholders can be used:
 				<ul>
 				<li><strong>%t</strong> - post title</li>
 				<li><strong>%u</strong> - permalink or Short URL (%s will also work)</li>
@@ -103,7 +108,7 @@
 						$default_autopost_after_delay = '';
 					}
 				?>
-				<p><label for="default-autopost-after-delay"><input name="default-autopost-after-delay" type="checkbox" id="default-autopost-after-delay" value="1" <?php checked('1', $default_autopost_after_delay); ?> /><?php _e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
+				<p><label for="default-autopost-after-delay"><input name="default-autopost-after-delay" type="checkbox" id="default-autopost-after-delay" value="1" <?php checked('1', $default_autopost_after_delay); ?> /><?php esc_html_e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
 				
 				<?php
 					if (isset($options['default-autopost-delay-prefix'])){
@@ -112,11 +117,11 @@
 						$default_autopost_delay_prefix = 'ICYMI:';
 					}
 				?>
-				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Autopost delay prefix','to-twitter') ?>:</span><br/>
 				<input type="text" name="default-autopost-delay-prefix" class="short-text" value="<?php echo $default_autopost_delay_prefix; ?>"></p>
 				
 				<p>
-					<span class="description"><?php _e('Select delay duration','to-twitter') ?>:</span><br/>
+					<span class="description"><?php esc_html_e('Select delay duration','to-twitter') ?>:</span><br/>
 					<select name="default-autopost-delay-number">
 						<?php
 							if (!isset($options['default-autopost-delay-number'])){ $options['default-autopost-delay-number'] = 30; }
@@ -149,9 +154,9 @@
 					</select>
 				</p>
 				
-				<h4><?php _e('Page Settings', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Page Settings', 'to-twitter'); ?></h4>
 				
-				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php _e('Autopost new pages?', 'to-twitter'); ?></label></p>
+				<p><label for="default_autopost_page"><input name="default_autopost_page" type="checkbox" id="default_autopost_page" value="1" <?php checked('1', $options['default_autopost_page']); ?> /><?php esc_html_e('Autopost new pages?', 'to-twitter'); ?></label></p>
 				
 				<?php
 					if (isset($options['default-page-tweet-format'])){
@@ -160,9 +165,9 @@
 						$default_page_tweet_format = '%t %u %h';
 					}
 				?>
-				<p><span class="description"><?php _e('Default page tweet format','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Default page tweet format','to-twitter') ?>:</span><br/>
 				<input type="text" name="default-page-tweet-format" class="regular-text" value="<?php echo $default_page_tweet_format; ?>"><br />
-				<span class="description"><?php _e('The following placeholders can be used:
+				<span class="description"><?php esc_html_e('The following placeholders can be used:
 				<ul>
 				<li><strong>%t</strong> - page title</li>
 				<li><strong>%u</strong> - permalink or Short URL</li>
@@ -176,7 +181,7 @@
 						$default_autopost_page_after_delay = '';
 					}
 				?>
-				<p><label for="default-autopost-page-after-delay"><input name="default-autopost-page-after-delay" type="checkbox" id="default-autopost-page-after-delay" value="1" <?php checked('1', $default_autopost_page_after_delay); ?> /><?php _e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
+				<p><label for="default-autopost-page-after-delay"><input name="default-autopost-page-after-delay" type="checkbox" id="default-autopost-page-after-delay" value="1" <?php checked('1', $default_autopost_page_after_delay); ?> /><?php esc_html_e('Autopost repeat tweets after delay?', 'to-twitter'); ?></label></p>
 				
 				<?php
 					if (isset($options['default-autopost-page-delay-prefix'])){
@@ -185,11 +190,11 @@
 						$default_autopost_page_delay_prefix = 'ICYMI:';
 					}
 				?>
-				<p><span class="description"><?php _e('Autopost delay prefix','to-twitter') ?>:</span><br/>
+				<p><span class="description"><?php esc_html_e('Autopost delay prefix','to-twitter') ?>:</span><br/>
 				<input type="text" name="default-autopost-page-delay-prefix" class="short-text" value="<?php echo $default_autopost_page_delay_prefix; ?>"></p>
 				
 				<p>
-					<span class="description"><?php _e('Select delay duration','to-twitter') ?>:</span><br/>
+					<span class="description"><?php esc_html_e('Select delay duration','to-twitter') ?>:</span><br/>
 					<select name="default-autopost-page-delay-number">
 						<?php
 							if (!isset($options['default-autopost-page-delay-number'])){ $options['default-autopost-page-delay-number'] = 59; }
@@ -226,10 +231,10 @@
 		
 		<div class="azrcrv_tt_tabs invisible tabs-3">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Enter default hashtags for categories (if the same hashtag is applied to multiple categories and/or tgs then only one instance will be included in the tweet):','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('Enter default hashtags for categories (if the same hashtag is applied to multiple categories and/or tgs then only one instance will be included in the tweet):','to-twitter') ?></span></p>
 				
 				<table>
-					<tr><th><?php _e('Category', 'to-twitter'); ?></th><th><?php _e('Hashtags', 'to-twitter'); ?></th></tr>
+					<tr><th><?php esc_html_e('Category', 'to-twitter'); ?></th><th><?php esc_html_e('Hashtags', 'to-twitter'); ?></th></tr>
 					<?php
 					$categories = get_categories(
 													array(
@@ -253,10 +258,10 @@
 		
 		<div class="azrcrv_tt_tabs invisible tabs-4">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Enter default hashtags for tags (if the same hashtag is applied to multiple categories and/or tgs then only one instance will be included in the tweet):','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('Enter default hashtags for tags (if the same hashtag is applied to multiple categories and/or tgs then only one instance will be included in the tweet):','to-twitter') ?></span></p>
 				
 				<table>
-					<tr><th><?php _e('Tag', 'to-twitter'); ?></th><th><?php _e('Hashtags', 'to-twitter'); ?></th></tr>
+					<tr><th><?php esc_html_e('Tag', 'to-twitter'); ?></th><th><?php esc_html_e('Hashtags', 'to-twitter'); ?></th></tr>
 					<?php
 					$tags = get_tags(
 													array(
@@ -280,10 +285,10 @@
 		
 		<div class="azrcrv_tt_tabs invisible tabs-5">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Enter the word and the replacement word; if a replacement is a hashtag, dulicates from category and tag hashtags will be removed:','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('Enter the word and the replacement word; if a replacement is a hashtag, dulicates from category and tag hashtags will be removed:','to-twitter') ?></span></p>
 				
 				<table>
-					<tr><th><?php _e('Word', 'to-twitter'); ?></th><th><?php _e('Replacement', 'to-twitter'); ?></th></tr>
+					<tr><th><?php esc_html_e('Word', 'to-twitter'); ?></th><th><?php esc_html_e('Replacement', 'to-twitter'); ?></th></tr>
 					<?php
 					
 					foreach ($options['word-replacement'] as $key => $value){
@@ -294,17 +299,17 @@
 					}
 					?>
 				</table>
-				<p><span class="description"><?php _e('To remove a replacement, delete the entry in the word column.','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('To remove a replacement, delete the entry in the word column.','to-twitter') ?></span></p>
 			</p>
 		</div>
 		
 		<div class="azrcrv_tt_tabs invisible tabs-6">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Due to the limitations of the WP Cron process, a scheduled tweet will only be sent if the site receives a visit on or after the scheduled time; this does mean a tweet scheduled for Monday at 10:00 woould, if a visitor first arrived at 21:09, get tweeted at that time. If there is no visitor on a day when a tweet is scheduled, then no tweet will be sent.','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('Due to the limitations of the WP Cron process, a scheduled tweet will only be sent if the site receives a visit on or after the scheduled time; this does mean a tweet scheduled for Monday at 10:00 woould, if a visitor first arrived at 21:09, get tweeted at that time. If there is no visitor on a day when a tweet is scheduled, then no tweet will be sent.','to-twitter') ?></span></p>
 				
-				<h4><?php _e('Schedule', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Schedule', 'to-twitter'); ?></h4>
 				<p><table>
-				<tr><th><?php _e('Day', 'to-twitter'); ?></th><th><?php _e('Time', 'to-twitter'); ?></th><th><?php _e('Filter', 'to-twitter'); ?></th><th><?php _e('Category', 'to-twitter'); ?></th><th>&nbsp;</th><th><?php _e('Tag', 'to-twitter'); ?></th><th><?php _e('Enable', 'to-twitter'); ?></th></tr>
+				<tr><th><?php esc_html_e('Day', 'to-twitter'); ?></th><th><?php esc_html_e('Time', 'to-twitter'); ?></th><th><?php esc_html_e('Filter', 'to-twitter'); ?></th><th><?php esc_html_e('Category', 'to-twitter'); ?></th><th>&nbsp;</th><th><?php esc_html_e('Tag', 'to-twitter'); ?></th><th><?php esc_html_e('Enable', 'to-twitter'); ?></th></tr>
 				<?php
 				
 				$days = array(
@@ -421,7 +426,7 @@
 				?>
 				</table></p>
 				
-				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Tweet Settings', 'to-twitter'); ?></h4>
 				<p>
 					<?php
 						if (isset($options['scheduled-tweet-generate'])){
@@ -430,18 +435,18 @@
 							$scheduled_tweet_generate = 0;
 						}
 					?>
-					<label for="scheduled-tweet-generate"><input name="scheduled-tweet-generate" type="checkbox" id="scheduled-tweet-generate" value="1" <?php checked('1', $scheduled_tweet_generate); ?> /><?php _e('Generate new tweet?', 'to-twitter'); ?></label>
+					<label for="scheduled-tweet-generate"><input name="scheduled-tweet-generate" type="checkbox" id="scheduled-tweet-generate" value="1" <?php checked('1', $scheduled_tweet_generate); ?> /><?php esc_html_e('Generate new tweet?', 'to-twitter'); ?></label>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
 					<input type="text" name="scheduled-tweet-prefix" class="short-text" value="<?php echo $options['scheduled-tweet-prefix']; ?>"></p>
 				</p>
 				<p>
-					<label for="scheduled-tweet-suffix"><input name="scheduled-tweet-suffix" type="checkbox" id="scheduled-tweet-suffix" value="1" <?php checked('1', $options['scheduled-tweet-suffix']); ?> /><?php _e('Include numeric suffix?', 'to-twitter'); ?></label><br />
-					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
+					<label for="scheduled-tweet-suffix"><input name="scheduled-tweet-suffix" type="checkbox" id="scheduled-tweet-suffix" value="1" <?php checked('1', $options['scheduled-tweet-suffix']); ?> /><?php esc_html_e('Include numeric suffix?', 'to-twitter'); ?></label><br />
+					<?php printf(esc_html__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Include posts which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Include posts which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
 						<?php
 							if (isset($options['scheduled-post-include-max-times-tweeted'])){
 								$includemaxtimes = $options['scheduled-post-include-max-times-tweeted'];
@@ -453,7 +458,7 @@
 					</p>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Select posts at least this many days old','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Select posts at least this many days old','to-twitter') ?>:</span><br/>
 						<select name="newest-post-age">
 							<?php
 								for ($ageloop = 0; $ageloop <= 365; $ageloop++){
@@ -469,9 +474,9 @@
 					</p>
 				</p>
 				
-				<h4><?php _e('Select tags which should not be included in scheduled tweets:', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Select tags which should not be included in scheduled tweets:', 'to-twitter'); ?></h4>
 				<p><table>
-				<tr><th><?php _e('Tag', 'to-twitter'); ?></th><th><?php _e('Exclude', 'to-twitter'); ?></th></tr>
+				<tr><th><?php esc_html_e('Tag', 'to-twitter'); ?></th><th><?php esc_html_e('Exclude', 'to-twitter'); ?></th></tr>
 				<?php
 				$tags = get_tags(
 									array(
@@ -502,11 +507,11 @@
 		
 		<div class="azrcrv_tt_tabs invisible tabs-7">
 			<p class="azrcrv_tt_horiz">
-				<p><span class="description"><?php _e('Due to the limitations of the WP Cron process, a scheduled tweet will only be sent if the site receives a visit on or after the scheduled time; this does mean a tweet scheduled for Monday at 10:00 woould, if a visitor first arrived at 21:09, get tweeted at that time. If there is no visitor on a day when a tweet is scheduled, then no tweet will be sent.','to-twitter') ?></span></p>
+				<p><span class="description"><?php esc_html_e('Due to the limitations of the WP Cron process, a scheduled tweet will only be sent if the site receives a visit on or after the scheduled time; this does mean a tweet scheduled for Monday at 10:00 woould, if a visitor first arrived at 21:09, get tweeted at that time. If there is no visitor on a day when a tweet is scheduled, then no tweet will be sent.','to-twitter') ?></span></p>
 				
-				<h4><?php _e('Schedule', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Schedule', 'to-twitter'); ?></h4>
 				<p><table>
-				<tr><th><?php _e('Day', 'to-twitter'); ?></th><th><?php _e('Time', 'to-twitter'); ?></th><th><?php _e('Filter', 'to-twitter'); ?></th><th><?php _e('Post Content', 'to-twitter'); ?></th><th><?php _e('Enable', 'to-twitter'); ?></th></tr>
+				<tr><th><?php esc_html_e('Day', 'to-twitter'); ?></th><th><?php esc_html_e('Time', 'to-twitter'); ?></th><th><?php esc_html_e('Filter', 'to-twitter'); ?></th><th><?php esc_html_e('Post Content', 'to-twitter'); ?></th><th><?php esc_html_e('Enable', 'to-twitter'); ?></th></tr>
 				<?php
 				
 				$days = array(
@@ -572,20 +577,20 @@
 				?>
 				</table></p>
 				
-				<h4><?php _e('Tweet Settings', 'to-twitter'); ?></h4>
+				<h4><?php esc_html_e('Tweet Settings', 'to-twitter'); ?></h4>
 				<p>
-					<label for="scheduled-page-tweet-generate"><input name="scheduled-page-tweet-generate" type="checkbox" id="scheduled-page-tweet-generate" value="1" <?php checked('1', $options['scheduled-page-tweet-generate']); ?> /><?php _e('Generate new tweet?', 'to-twitter'); ?></label>
+					<label for="scheduled-page-tweet-generate"><input name="scheduled-page-tweet-generate" type="checkbox" id="scheduled-page-tweet-generate" value="1" <?php checked('1', $options['scheduled-page-tweet-generate']); ?> /><?php esc_html_e('Generate new tweet?', 'to-twitter'); ?></label>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Scheduled tweet prefix','to-twitter') ?>:</span><br/>
 					<input type="text" name="scheduled-page-tweet-prefix" class="short-text" value="<?php echo $options['scheduled-page-tweet-prefix']; ?>"></p>
 				</p>
 				<p>
-					<label for="scheduled-page-tweet-suffix"><input name="scheduled-page-tweet-suffix" type="checkbox" id="scheduled-page-tweet-suffix" value="1" <?php checked('1', $options['scheduled-page-tweet-suffix']); ?> /><?php _e('Include numeric suffix?', 'to-twitter'); ?></label><br />
-					<?php printf(__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
+					<label for="scheduled-page-tweet-suffix"><input name="scheduled-page-tweet-suffix" type="checkbox" id="scheduled-page-tweet-suffix" value="1" <?php checked('1', $options['scheduled-page-tweet-suffix']); ?> /><?php esc_html_e('Include numeric suffix?', 'to-twitter'); ?></label><br />
+					<?php printf(esc_html__('Scheduled tweets will be appended with %s where %s is a sequential number.', 'to-twitter'), '<strong>[<em>n</em>]</strong>', '<strong><em>n</em></strong>'); ?>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Include pages which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Include pages which have been tweeted this maximum number of times','to-twitter') ?>:</span><br/>
 						<?php
 							if (isset($options['scheduled-page-include-max-times-tweeted'])){
 								$includemaxtimes = $options['scheduled-page-include-max-times-tweeted'];
@@ -597,7 +602,7 @@
 					</p>
 				</p>
 				<p>
-					<p><span class="description"><?php _e('Select pages at least this many days old','to-twitter') ?>:</span><br/>
+					<p><span class="description"><?php esc_html_e('Select pages at least this many days old','to-twitter') ?>:</span><br/>
 						<select name="newest-page-age">
 							<?php
 								for ($ageloop = 0; $ageloop <= 100; $ageloop++){
@@ -615,6 +620,6 @@
 			</p>
 		</div>
 	</div>
-	<input type="submit" style="margin-top: 6px;" value="<?php _e('Save Settings', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit" />
+	<input type="submit" style="margin-top: 6px;" value="<?php esc_html_e('Save Settings', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit" />
 	</form>
 </div>

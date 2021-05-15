@@ -1,6 +1,11 @@
 <div class="wrap arcrv-tt">
 	
-	<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+	<h1>
+		<?php
+			echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+			esc_html_e(get_admin_page_title());
+		?>
+	</h1>
 	
 	<table>
 		<tr>
@@ -115,7 +120,7 @@
 			echo '<tr><td style=" text-align: center; ">'.esc_html($tweet['date']).'</td><td style="text-align: center; ">'.esc_html($tweet['time']).'</td><td style="text-align: center; ">'.esc_html($tweet['title']).'</td><td class style=" text-align: center;">'.$status.'</td><td style=" ">'.$tweet_link.$tweet['tweet'].'</td></tr>';
 		}
 		if (!$found){
-			echo '<tr><td></td><td></td><td></td><td></td><td><em>'.__('No tweet history found.', 'azrcrv-tt').'</em></td></tr>';
+			echo '<tr><td></td><td></td><td></td><td></td><td><em>'.esc_html__('No tweet history found.', 'azrcrv-tt').'</em></td></tr>';
 		}
 		
 		?>

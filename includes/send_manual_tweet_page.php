@@ -2,7 +2,12 @@
 
 <div class="wrap arcrv-tt">
 	
-	<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+	<h1>
+		<?php
+			echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+			esc_html_e(get_admin_page_title());
+		?>
+	</h1>
 	
 	<?php if( isset($_GET['tweet-sent']) ) { ?>
 		<div class="notice notice-success is-dismissible">
@@ -34,7 +39,7 @@
 
         <div>
 			<p class="azrcrv_tt_horiz">
-				<textarea name="tweet" rows="5" id="tweet" class="large-text code" maxlength="240" onkeyup="countChar(this)" placeholder="<?php _e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
+				<textarea name="tweet" rows="5" id="tweet" class="large-text code" maxlength="240" onkeyup="countChar(this)" placeholder="<?php esc_html_e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
 				<div id="the-count" style='float: right;' >
 					<span id="current_counter">0</span><span id="maximum">/240</span>
 				</div>
@@ -42,11 +47,11 @@
 				<?php
 				if (isset($reply_to)){
 					$thread = 1;
-					$thread_message = __('Send as part of thread? (unmark to send as last tweet in thread)', 'to-twitter');
+					$thread_message = esc_html__('Send as part of thread? (unmark to send as last tweet in thread)', 'to-twitter');
 					echo '<input type="hidden" name="reply-to" value="'.$reply_to.'" />';
 				}else{
 					$thread = 0;
-					$thread_message = __('Send as part of thread?', 'to-twitter');
+					$thread_message = esc_html__('Send as part of thread?', 'to-twitter');
 				}
 				?>
 				<p><label for="thread"><input name="thread" type="checkbox" id="thread" value="1" <?php checked('1', $thread); ?> /><?php echo $thread_message; ?></label></p>
@@ -64,8 +69,8 @@
 							echo '<div style="float: left; width: 170px; text-align: center; ">';
 								echo '<img src="'.$tweet_image[$media_loop].'" id="tweet-image-'.$media_loop.'" style="width: 160px;"><br />';
 								echo '<input type="hidden" name="tweet-selected-image-'.$media_loop.'" id="tweet-selected-image-'.$media_loop.'" value="" class="regular-text" />';
-								echo '<input type="button" id="azrcrv-tt-upload-image-'.$media_loop.'" class="button upload" value="'.__('Upload', 'to-twitter').'" />&nbsp;';
-								echo '<input type="button" id="azrcrv-tt-remove-image-'.$media_loop.'" class="button remove" value="'.__( 'Remove', 'to-twitter').'" />';
+								echo '<input type="button" id="azrcrv-tt-upload-image-'.$media_loop.'" class="button upload" value="'.esc_html__('Upload', 'to-twitter').'" />&nbsp;';
+								echo '<input type="button" id="azrcrv-tt-remove-image-'.$media_loop.'" class="button remove" value="'.esc_html__( 'Remove', 'to-twitter').'" />';
 							echo '</div>';
 						}
 					?>
@@ -73,7 +78,7 @@
 				
 				<p style="clear: both; " />
 				<div style="width: 100%x; display: block; padding-top: 12px; ">
-					<input type="submit" style="margin:3px;" value="<?php _e('Send Tweet', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit"/>
+					<input type="submit" style="margin:3px;" value="<?php esc_html_e('Send Tweet', 'to-twitter'); ?>" class="button-primary" id="submit" name="submit"/>
 				</div>
 			</p>
         </div>
