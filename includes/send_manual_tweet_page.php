@@ -4,7 +4,7 @@
 	
 	<h1>
 		<?php
-			echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('/pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
+			echo '<a href="https://development.azurecurve.co.uk/classicpress-plugins/"><img src="'.plugins_url('../pluginmenu/images/logo.svg', __FILE__).'" style="padding-right: 6px; height: 20px; width: 20px;" alt="azurecurve" /></a>';
 			esc_html_e(get_admin_page_title());
 		?>
 	</h1>
@@ -48,7 +48,7 @@
 				if (isset($reply_to)){
 					$thread = 1;
 					$thread_message = esc_html__('Send as part of thread? (unmark to send as last tweet in thread)', 'to-twitter');
-					echo '<input type="hidden" name="reply-to" value="'.$reply_to.'" />';
+					echo '<input type="hidden" name="reply-to" value="'.esc_attr($reply_to).'" />';
 				}else{
 					$thread = 0;
 					$thread_message = esc_html__('Send as part of thread?', 'to-twitter');
