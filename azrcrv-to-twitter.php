@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.17.1
+ * Version: 1.17.2
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -458,7 +458,7 @@ function azrcrv_tt_generate_sidebar_metabox(){
 	<p class="autopost">
 		<?php wp_nonce_field(basename(__FILE__), 'azrcrv-tt-nonce');
 		if ($tweeted == 1){
-			printf( '<p>'.esc_html__('This %s has already been tweeted', 'to-twitter').'</p>', $post->post_type == 'post');
+			printf( '<p>'.esc_html__('This %s has already been tweeted', 'to-twitter').'</p>', $post->post_type);
 		}
 		?>
 		<p><input type="checkbox" name="autopost" <?php if( $autopost == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post tweet on publish/update?', 'to-twitter'); ?></p>
