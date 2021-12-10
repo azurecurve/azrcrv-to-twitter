@@ -1,4 +1,4 @@
-# [To Twitter plugin for ClassicPress](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
+# [To Twitter](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
 ![Plugin Banner](/assets/pluginimages/banner-1544x500.png)
 
 # Description
