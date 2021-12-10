@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the sending of tweets from your ClassicPress site to Twitter.
-Version:		1.17.2
+Version:		1.17.3
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.17.2/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.17.3/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -43,7 +43,7 @@ This plugin is multisite compatible with each site having its own settings.
 
 # Installation Instructions
 
-* Download the plugin from [GitHub](https://github.com/azurecurve/azrcrv-to-twitter/releases/latest/).
+* Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-to-twitter/releases/latest/).
 * Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
 * Activate the plugin.
 * Apply for a [Twitter Developer account](https://developer.twitter.com/en/apply-for-access).
@@ -55,7 +55,7 @@ This plugin is multisite compatible with each site having its own settings.
 # Frequently Asked Questions
 
 ### Can I translate this plugin?
-Yes, the .pot fie is in the plugins languages folder and can also be downloaded from the plugin page on https://development.azurecurve.co.uk; if you do translate this plugin, please sent the .po and .mo files to translations@azurecurve.co.uk for inclusion in the next version (full credit will be given).
+Yes, the .pot file is in the plugins languages folder; if you do translate this plugin, please sent the .po and .mo files to translations@azurecurve.co.uk for inclusion in the next version (full credit will be given).
 
 ### Is this plugin compatible with both WordPress and ClassicPress?
 This plugin is developed for ClassicPress, but will likely work on WordPress.
@@ -63,6 +63,10 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 == Changelog ==
 
 # Changelog
+
+### [Version 1.17.3](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.17.3)
+ * Update azurecurve menu.
+ * Update readme files.
 
 ### [Version 1.17.2](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.17.2)
  * Fix but with display of tweeted confirmation message in sidebar metabox.
@@ -103,7 +107,7 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
  * Fix bug with tweet history either not recording full history or not displaying full history.
 
 ### [Version 1.14.1](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.14.1)
- * Fix incorrect download link.
+ * Fix incorrect Download link.
  
 ### [Version 1.14.0](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.14.0)
  * Add image media upload to posts, pages, manual and scheduled tweets (up to four images supported).
@@ -209,7 +213,7 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # About azurecurve
 
-**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://codepotent.com/classicpress/plugins/update-manager/) by [CodePotent](https://codepotent.com/) for fully integrated, no hassle, updates.
+**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager) for fully integrated, no hassle, updates.
 
 Some of the other plugins available from **azurecurve** are:
  * [Add Open Graph Tags] (https://development.azurecurve.co.uk/classicpress-plugins/add-open-graph-tags/) ([download] (https://github.com/azurecurve/azrcrv-add-open-graph-tags/releases/latest/))

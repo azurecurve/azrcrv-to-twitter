@@ -1,5 +1,5 @@
-# azrcrv-to-twitter
-[To Twitter plugin for ClassicPress](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
+# [To Twitter plugin for ClassicPress](https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/)
+![Plugin Banner](/assets/pluginimages/banner-1544x500.png)
 
 # Description
 
@@ -22,7 +22,7 @@ This plugin is multisite compatible with each site having its own settings.
 
 # Installation Instructions
 
-* Download the plugin from [GitHub](https://github.com/azurecurve/azrcrv-to-twitter/releases/latest/).
+* Download the latest release of the plugin from [GitHub](https://github.com/azurecurve/azrcrv-to-twitter/releases/latest/).
 * Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
 * Activate the plugin.
 * Apply for a [Twitter Developer account](https://developer.twitter.com/en/apply-for-access).
@@ -31,16 +31,16 @@ This plugin is multisite compatible with each site having its own settings.
 
 # About azurecurve
 
-**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://codepotent.com/classicpress/plugins/update-manager/) by [CodePotent](https://codepotent.com/) for fully integrated, no hassle, updates.
+**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager) for fully integrated, no hassle, updates.
 
 Some of the other plugins available from **azurecurve** are:
- * [Add Open Graph Tags] (https://development.azurecurve.co.uk/classicpress-plugins/add-open-graph-tags/) ([download] (https://github.com/azurecurve/azrcrv-add-open-graph-tags/releases/latest/))
- * [Add Twitter Cards] (https://development.azurecurve.co.uk/classicpress-plugins/add-twitter-cards/) ([download] (https://github.com/azurecurve/azrcrv-add-twitter-cards/releases/latest/))
- * [Avatars] (https://development.azurecurve.co.uk/classicpress-plugins/avatars/) ([download] (https://github.com/azurecurve/azrcrv-avatars/releases/latest/))
- * [Maintenance Mode] (https://development.azurecurve.co.uk/classicpress-plugins/maintenance-mode/) ([download] (https://github.com/azurecurve/azrcrv-maintenance-mode/releases/latest/))
- * [Events] (https://development.azurecurve.co.uk/classicpress-plugins/events/) ([download] (https://github.com/azurecurve/azrcrv-events/releases/latest/))
- * [Markdown] (https://development.azurecurve.co.uk/classicpress-plugins/markdown/) ([download] (https://github.com/azurecurve/azrcrv-markdown/releases/latest/))
- * [Remove Revisions] (https://development.azurecurve.co.uk/classicpress-plugins/remove-revisions/) ([download] (https://github.com/azurecurve/azrcrv-remove-revisions/releases/latest/))
- * [Redirect] (https://development.azurecurve.co.uk/classicpress-plugins/redirect/) ([download] (https://github.com/azurecurve/azrcrv-redirect/releases/latest/))
- * [SMTP] (https://development.azurecurve.co.uk/classicpress-plugins/smtp/) ([download] (https://github.com/azurecurve/azrcrv-smtp/releases/latest/))
- * [To Twitter] (https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/) ([download] (https://github.com/azurecurve/azrcrv-to-twitter/releases/latest/))
+ * Add Open Graph Tags - [details](https://development.azurecurve.co.uk/classicpress-plugins/add-open-graph-tags/) / [download](https://github.com/azurecurve/azrcrv-add-open-graph-tags/releases/latest/)
+ * Add Twitter Cards - [details](https://development.azurecurve.co.uk/classicpress-plugins/add-twitter-cards/) / [download](https://github.com/azurecurve/azrcrv-add-twitter-cards/releases/latest/)
+ * Avatars - [details](https://development.azurecurve.co.uk/classicpress-plugins/avatars/) / [download](https://github.com/azurecurve/azrcrv-avatars/releases/latest/)
+ * Events - [details](https://development.azurecurve.co.uk/classicpress-plugins/events/) / [download](https://github.com/azurecurve/azrcrv-events/releases/latest/)
+ * Filtered Categories - [details](https://development.azurecurve.co.uk/classicpress-plugins/filtered-categories/) / [download](https://github.com/azurecurve/azrcrv-filtered-categories/releases/latest/)
+ * Maintenance Mode - [details](https://development.azurecurve.co.uk/classicpress-plugins/maintenance-mode/) / [download](https://github.com/azurecurve/azrcrv-maintenance-mode/releases/latest/)
+ * Markdown - [details](https://development.azurecurve.co.uk/classicpress-plugins/markdown/) / [download](https://github.com/azurecurve/azrcrv-markdown/releases/latest/)
+ * Redirect - [details](https://development.azurecurve.co.uk/classicpress-plugins/redirect/) / [download](https://github.com/azurecurve/azrcrv-redirect/releases/latest/)
+ * Remove Revisions - [details](https://development.azurecurve.co.uk/classicpress-plugins/remove-revisions/) / [download](https://github.com/azurecurve/azrcrv-remove-revisions/releases/latest/)
+ * SMTP - [details](https://development.azurecurve.co.uk/classicpress-plugins/smtp/) / [download](https://github.com/azurecurve/azrcrv-smtp/releases/latest/)
