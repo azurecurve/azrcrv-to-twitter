@@ -1,12 +1,12 @@
 === To Twitter ===
 
 Description:	Automate the sending of tweets from your ClassicPress site to Twitter.
-Version:		1.17.3
+Version:		1.17.5
 Tags:			tweets,twitter,automatic 
 Author:			azurecurve
 Author URI:		https://development.azurecurve.co.uk/
 Plugin URI:		https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
-Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.17.3/azrcrv-to-twitter.zip
+Download link:	https://github.com/azurecurve/azrcrv-to-twitter/releases/download/v1.17.5/azrcrv-to-twitter.zip
 Donate link:	https://development.azurecurve.co.uk/support-development/
 Requires PHP:	5.6
 Requires:		1.0.0
@@ -47,7 +47,8 @@ This plugin is multisite compatible with each site having its own settings.
 * Upload the entire zip file using the Plugins upload function in your ClassicPress admin panel.
 * Activate the plugin.
 * Apply for a [Twitter Developer account](https://developer.twitter.com/en/apply-for-access).
-* Create your Twitter application [here](https://developer.twitter.com/en/apps).
+* Create your Twitter application [here](https://developer.twitter.com/en/portal/dashboard).
+* Request upgrade of your Twitter Essential developer profile to Twitter Elevated.
 * Configure settings (including your Consumer API Keys and Access Token and Secret) via the configuration page in the admin control panel.
 
 == Frequently Asked Questions ==
@@ -64,6 +65,14 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # Changelog
 
+### [Version 1.17.5](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.17.5)
+ * Fix bug with Exclude from Schedule checkbox on post/page admin pages not populating correctly.
+
+### [Version 1.17.4](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.17.4)
+ * Update readme files.
+ * Update language template.
+ * Fix bug with azurecurve menu.
+ 
 ### [Version 1.17.3](https://github.com/azurecurve/azrcrv-to-twitter/releases/tag/v1.17.3)
  * Update azurecurve menu.
  * Update readme files.
@@ -213,7 +222,7 @@ This plugin is developed for ClassicPress, but will likely work on WordPress.
 
 # About azurecurve
 
-**azurecurve** was one of the first plugin developers to start developing for Classicpress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager) for fully integrated, no hassle, updates.
+**azurecurve** was one of the first plugin developers to start developing for ClassicPress; all plugins are available from [azurecurve Development](https://development.azurecurve.co.uk/) and are integrated with the [Update Manager plugin](https://directory.classicpress.net/plugins/update-manager) for fully integrated, no hassle, updates.
 
 Some of the other plugins available from **azurecurve** are:
  * [Add Open Graph Tags] (https://development.azurecurve.co.uk/classicpress-plugins/add-open-graph-tags/) ([download] (https://github.com/azurecurve/azrcrv-add-open-graph-tags/releases/latest/))

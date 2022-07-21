@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.17.3
+ * Version: 1.17.5
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -453,6 +453,12 @@ function azrcrv_tt_generate_sidebar_metabox(){
 		}
 	}
 	
+	if(metadata_exists('post', $post->ID, '_azrcrv_tt_exclude_schedule')) {
+		$exclude_schedule = get_post_meta($post->ID, '_azrcrv_tt_exclude_schedule', true);
+	}else{
+		$exclude_schedule = 0;
+	}	
+	
 	$tweeted = get_post_meta($post->ID, '_azrcrv_tt_tweeted', true);
 	?>
 	<p class="autopost">
@@ -475,7 +481,7 @@ function azrcrv_tt_generate_sidebar_metabox(){
 		
 		<p><input type="checkbox" name="autopost-after-delay" <?php if( $autopost_after_delay == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Post retweet on delay after post/update?', 'to-twitter'); ?></p>
 		
-		<p><input type="checkbox" name="exclude-schedule" />  <?php esc_html_e('Exclude from schedule', 'to-twitter'); ?></p>
+		<p><input type="checkbox" name="exclude-schedule" <?php if( $exclude_schedule == 1 ) { ?>checked="checked"<?php } ?> />  <?php esc_html_e('Exclude from schedule', 'to-twitter'); ?></p>
 	</p>
 	
 <?
