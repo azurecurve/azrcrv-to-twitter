@@ -45,9 +45,16 @@
 		<div class="azrcrv_tt_tabs tabs-1">
 			<form method="post" action="admin-post.php">
 				<input type="hidden" name="action" value="azrcrv_tt_schedule_tweet" />
-				<?php wp_nonce_field('azrcrv-tt-st', 'azrcrv-tt-st-nonce'); ?>
+				<?php
+					wp_nonce_field('azrcrv-tt-st', 'azrcrv-tt-st-nonce');
+					if ( isset( $azrcrv_tt['ignore-tweet-max-length'] ) && $azrcrv_tt['ignore-tweet-max-length'] = 1 ) {
+						$tweet_max_length = '';
+					}else{
+						$tweet_max_length = 'maxlength="240"';
+					}
+				?>
 				<p class="azrcrv_tt_horiz">
-					<textarea name="tweet" rows="5" id="tweet" class="large-text code" maxlength="240" onkeyup="countChar(this)" placeholder="<?php esc_html_e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
+					<textarea name="tweet" rows="5" id="tweet" class="large-text code" <?php echo $tweet_max_length; ?> onkeyup="countChar(this)" placeholder="<?php esc_html_e("What's happening?", 'to-twitter'); ?>"autofocus></textarea>
 					<div id="the-count" style='float: right;' >
 						<span id="current_counter">0</span><span id="maximum">/240</span>
 					</div>

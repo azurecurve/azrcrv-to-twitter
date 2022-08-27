@@ -81,6 +81,16 @@
 				?>
 				<p><label for="record_tweet_history"><input name="record_tweet_history" type="checkbox" id="record_tweet_history" value="1" <?php checked('1', $record_tweet_history); ?> /><?php esc_html_e('Record tweet history?', 'to-twitter'); ?></label></p>
 				
+				<?php
+					if (isset($options['ignore-tweet-max-length'])){
+						$ignore_tweet_max_length = $options['ignore-tweet-max-length'];
+					}else{
+						$ignore_tweet_max_length = '';
+					}
+				?>
+				<p><label for="ignore-tweet-max-length"><input name="ignore-tweet-max-length" type="checkbox" id="ignore-tweet-max-length" value="1" <?php checked('1', $ignore_tweet_max_length); ?> /><?php esc_html_e('Ignore tweet max length?', 'to-twitter'); ?></label></p><br />
+				<span class="description"><?php esc_html_e('Enable to ignore max length of tweet; useful when using hashtags and URIs as these are counted differently; care must be taken not to create a tweet which is too long.','to-twitter'); ?></span>
+				
 				<h4><?php esc_html_e('Post Settings', 'to-twitter'); ?></h4>
 				
 				<p><label for="default_autopost"><input name="default_autopost" type="checkbox" id="default_autopost" value="1" <?php checked('1', $options['default_autopost']); ?> /><?php esc_html_e('Autopost new posts?', 'to-twitter'); ?></label></p>
