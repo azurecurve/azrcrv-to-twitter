@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.18.0
+ * Version: 1.18.1
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
@@ -793,18 +793,20 @@ function azrcrv_tt_create_tweet_history_metabox() {
 	
 	global $post; // Get the current post data
 	
-	if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
-	
-		$post_types = array('post','page');
+	if ( isset( $post ) ) {
+		if(metadata_exists('post', $post->ID, '_azrcrv_tt_tweet_history')) {
 		
-		add_meta_box(
-			'azrcrv_tt_tweet_history_metabox', // Metabox ID
-			'Tweet History', // Title to display
-			'azrcrv_tt_render_tweet_history_metabox', // Function to call that contains the metabox content
-			$post_types, // Post type to display metabox on
-			'normal', // Where to put it (normal = main colum, side = sidebar, etc.)
-			'default' // Priority relative to other metaboxes
-		);
+			$post_types = array('post','page');
+			
+			add_meta_box(
+				'azrcrv_tt_tweet_history_metabox', // Metabox ID
+				'Tweet History', // Title to display
+				'azrcrv_tt_render_tweet_history_metabox', // Function to call that contains the metabox content
+				$post_types, // Post type to display metabox on
+				'normal', // Where to put it (normal = main colum, side = sidebar, etc.)
+				'default' // Priority relative to other metaboxes
+			);
+		}
 	}
 
 }
@@ -1028,6 +1030,7 @@ function azrcrv_tt_post_tweet($parameters){
 			$parameters['media_ids'] = implode(',', $media);
 		}
 	}
+	$parameters['status'] = wp_unslash( $parameters['status'] );
 	
 	$tweet_result = $connection->post("statuses/update", $parameters);
 	$tweet_result = (array) $tweet_result;

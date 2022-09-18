@@ -117,7 +117,7 @@
 									</form></td>
 									<td style="width: 100px; text-align: center; "><?php echo $tweet['date']; ?></td>
 									<td style="width: 80px; text-align: center; "><?php echo $tweet['time']; ?></td>
-									<td style="width: 400px; "><?php echo $tweet['tweet']; ?></td>
+									<td style="width: 400px; "><?php echo wp_unslash( $tweet['tweet'] ); ?></td>
 								</tr>
 								<?php
 							}
@@ -155,7 +155,7 @@
 							}else{
 								$tweet_link = '';
 							}
-							echo '<tr><td style="width: 100px; text-align: center; ">'.$tweet['date'].'</td><td style="width: 80px; text-align: center; ">'.$tweet['time'].'</td><td style="width: 80px; text-align: center; ">'.$status.'</td><td style="width: 300px; text-align: left; ">'.$tweet_link.$tweet['tweet'].'</td></tr>';
+							echo '<tr><td style="width: 100px; text-align: center; ">'.$tweet['date'].'</td><td style="width: 80px; text-align: center; ">'.$tweet['time'].'</td><td style="width: 80px; text-align: center; ">'. $status .'</td><td style="width: 300px; text-align: left; ">'.$tweet_link. wp_unslash( $tweet['tweet'] ) .'</td></tr>';
 						}
 					}
 					if (!$found){
