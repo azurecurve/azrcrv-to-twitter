@@ -3,7 +3,7 @@
  * ------------------------------------------------------------------------------
  * Plugin Name: To Twitter
  * Description: Automate the sending of tweets from your ClassicPress site to Twitter.
- * Version: 1.18.1
+ * Version: 1.18.2
  * Author: azurecurve
  * Author URI: https://development.azurecurve.co.uk/classicpress-plugins/
  * Plugin URI: https://development.azurecurve.co.uk/classicpress-plugins/to-twitter/
